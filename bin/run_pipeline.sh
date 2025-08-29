@@ -23,14 +23,18 @@ log_success() {
 
 # Function to run the pipeline
 run_pipeline() {
-    local categories=${PIPELINE_CATEGORIES:-"Baseball,Hockey,Basketball,Football"}
+    local categories=${PIPELINE_CATEGORIES:-"discover"}
     local concurrency=${PIPELINE_MAX_CONCURRENCY:-3}
     local delay=${PIPELINE_DELAY:-1.0}
+    local max_retries=${PIPELINE_MAX_RETRIES:-3}
+    local retry_backoff=${PIPELINE_RETRY_BACKOFF:-2.0}
     
     log "Starting scheduled pipeline execution..."
     log "  Categories: $categories"
     log "  Concurrency: $concurrency"
     log "  Delay: ${delay}s"
+    log "  Max Retries: $max_retries"
+    log "  Retry Backoff: ${retry_backoff}s"
     
     # Convert comma-separated categories to space-separated for CLI
     local categories_array=$(echo "$categories" | tr ',' ' ')
@@ -39,7 +43,7 @@ run_pipeline() {
     export PYTHONPATH="/app/src:$PYTHONPATH"
     
     # Run the pipeline
-    if python -m scraper.pipeline --categories $categories_array --concurrency "$concurrency" --delay "$delay"; then
+    if python -m scraper.unified_pipeline --categories $categories_array --concurrency "$concurrency" --delay "$delay" --max-retries "$max_retries" --retry-backoff "$retry_backoff"; then
         log_success "Scheduled pipeline execution completed successfully"
         return 0
     else

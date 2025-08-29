@@ -75,8 +75,20 @@ class MultiLevelOrchestrator:
         try:
             result = extract_years_from_url(sport_url)
             
+            # Validate discovered data
+            if not result.get('years'):
+                print(f"Warning: No years discovered for {sport_url}")
+                return {'years': [], 'totals': []}
+            
+            print(f"  Discovered {len(result['years'])} years: {[y['year'] for y in result['years']]}")
+            
             # Store years in database
             for year_data in result['years']:
+                # Validate year data
+                if not year_data.get('year') or not year_data.get('year_url'):
+                    print(f"    Warning: Skipping invalid year data: {year_data}")
+                    continue
+                    
                 upsert_years_index(
                     self.session,
                     sport=year_data['sport'],
@@ -120,8 +132,20 @@ class MultiLevelOrchestrator:
         try:
             result = extract_sets_from_url(year_url)
             
+            # Validate discovered data
+            if not result.get('sets'):
+                print(f"    Warning: No sets discovered for {year_url}")
+                return {'sets': [], 'totals': []}
+            
+            print(f"    Discovered {len(result['sets'])} sets: {[s['set_title'] for s in result['sets']]}")
+            
             # Store sets in database
             for set_data in result['sets']:
+                # Validate set data
+                if not set_data.get('set_title') or not set_data.get('set_urls'):
+                    print(f"      Warning: Skipping invalid set data: {set_data}")
+                    continue
+                    
                 upsert_sets_per_year(
                     self.session,
                     sport=set_data['sport'],
@@ -171,8 +195,20 @@ class MultiLevelOrchestrator:
         try:
             result = extract_cards_from_url(set_data['set_page_url'], set_data['set_title'])
             
+            # Validate discovered data
+            if not result.get('cards'):
+                print(f"        Warning: No cards discovered for {set_data['set_title']}")
+                return {'cards': [], 'totals': []}
+            
+            print(f"        Discovered {len(result['cards'])} cards: {[c['card_name'] for c in result['cards'][:5]]}{'...' if len(result['cards']) > 5 else ''}")
+            
             # Store cards in database
             for card_data in result['cards']:
+                # Validate card data
+                if not card_data.get('card_name') or not card_data.get('card_urls'):
+                    print(f"          Warning: Skipping invalid card data: {card_data}")
+                    continue
+                    
                 upsert_cards_per_set(
                     self.session,
                     sport=card_data['sport'],
@@ -245,7 +281,12 @@ class MultiLevelOrchestrator:
                     completed_date_iso=row_data.get('completed_date_iso')
                 )
             
-            print(f"            Stored {len(grade_rows)} grade rows")
+            # Log report URL discovery
+            report_urls_found = sum(1 for row in grade_rows if row.get('report_url'))
+            if report_urls_found > 0:
+                print(f"            Stored {len(grade_rows)} grade rows with {report_urls_found} report URLs")
+            else:
+                print(f"            Stored {len(grade_rows)} grade rows (no report URLs found)")
             return len(grade_rows)
             
         except Exception as e:
@@ -375,6 +416,14 @@ class MultiLevelOrchestrator:
         end_time = time.time()
         duration = end_time - start_time
         
+        # Calculate pages scraped
+        pages_scraped = (
+            1 +  # Sport index page
+            len(years_result['years']) +  # Year pages
+            len(all_sets) +  # Set pages
+            len(all_cards)   # Card pages
+        )
+        
         # Summary
         summary = {
             'sport_url': sport_url,
@@ -385,7 +434,8 @@ class MultiLevelOrchestrator:
             'total_cards': len(all_cards),
             'set_totals': len(all_set_totals),
             'total_grade_rows': total_grade_rows,
-            'duration_seconds': duration
+            'duration_seconds': duration,
+            'pages_scraped': pages_scraped
         }
         
         print(f"\n{'='*60}")
@@ -399,6 +449,7 @@ class MultiLevelOrchestrator:
         print(f"Sport-level totals: {summary['sport_totals']}")
         print(f"Year-level totals: {summary['year_totals']}")
         print(f"Set-level totals: {summary['set_totals']}")
+        print(f"Pages scraped: {summary['pages_scraped']}")
         print(f"Duration: {duration:.1f} seconds")
         print('='*60)
         

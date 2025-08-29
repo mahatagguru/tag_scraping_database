@@ -85,7 +85,11 @@ def extract_report_url_from_cell(cell):
     
     href = anchor.attributes.get('href', '')
     if href and not href.startswith('#') and not href.startswith('javascript:'):
-        return urljoin(BASE_URL, href)
+        # Normalize URL to absolute format
+        normalized_url = urljoin(BASE_URL, href)
+        # Ensure we have a valid URL
+        if normalized_url.startswith('http'):
+            return normalized_url
     
     return None
 
@@ -106,7 +110,7 @@ def map_columns_by_headers(header_row):
             column_map['rank'] = i
         elif 'tag grade' in header_text:
             column_map['tag_grade'] = i
-        elif 'view report' in header_text:
+        elif 'view report' in header_text or 'report' in header_text:
             column_map['report_url'] = i
         elif 'rank by grade' in header_text:
             column_map['rank_by_grade'] = i
@@ -235,11 +239,19 @@ def extract_grade_rows_from_card_page(html, sport, year, set_title, card_name, c
         
         # Ensure we have a cert_number (required field)
         if 'cert_number' not in row_data or not row_data['cert_number']:
+            print(f"        Skipping row without cert_number")
             continue
         
         # Skip rows with missing essential data
         if not row_data.get('tag_grade'):
+            print(f"        Skipping row without tag_grade")
             continue
+        
+        # Validate report URL if present
+        if 'report_url' in row_data and row_data['report_url']:
+            if not row_data['report_url'].startswith('http'):
+                print(f"        Warning: Invalid report URL format: {row_data['report_url']}")
+                row_data['report_url'] = None
         
         grade_rows.append(row_data)
     

@@ -25,7 +25,9 @@ services:
       # Pipeline configuration
       PIPELINE_MAX_CONCURRENCY: ${PIPELINE_MAX_CONCURRENCY:-3}
       PIPELINE_DELAY: ${PIPELINE_DELAY:-1.0}
-      PIPELINE_CATEGORIES: ${PIPELINE_CATEGORIES:-Baseball,Hockey,Basketball,Football}
+      PIPELINE_CATEGORIES: ${PIPELINE_CATEGORIES:-discover}
+      PIPELINE_MAX_RETRIES: ${PIPELINE_MAX_RETRIES:-3}
+      PIPELINE_RETRY_BACKOFF: ${PIPELINE_RETRY_BACKOFF:-2.0}
       
       # Scheduling configuration
       PIPELINE_SCHEDULE: ${PIPELINE_SCHEDULE:-0 2 * * 0}  # Default: Sundays at 2 AM

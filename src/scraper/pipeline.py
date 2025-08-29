@@ -46,7 +46,8 @@ from scraper.db_helpers import (
 
 # Configuration
 BASE_URL = "https://my.taggrading.com"
-DEFAULT_CATEGORIES = ["Baseball", "Hockey", "Basketball", "Football"]
+# Default to discovering all categories automatically
+DEFAULT_CATEGORIES = []  # Empty list means discover all categories
 MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 2.0
 RETRY_JITTER_MAX = 1.0
@@ -324,6 +325,11 @@ class FiveTierPipeline:
         # Use the existing multi-level orchestrator
         from scraper.multi_level_orchestrator import scrape_multiple_sports
         
+        logger.info(f"🚀 Starting dynamic discovery and scraping for {len(categories)} categories")
+        logger.info(f"   Categories: {categories}")
+        logger.info(f"   Concurrency: {self.concurrency}")
+        logger.info(f"   Delay: {self.delay}s")
+        
         try:
             summaries = scrape_multiple_sports(
                 sport_urls, 
@@ -361,13 +367,13 @@ class FiveTierPipeline:
 
 
 def main():
-    """CLI entry point"""
+    """CLI entry point - Defaults to discovering and scraping ALL available categories"""
     parser = argparse.ArgumentParser(
         description='Five-Tier TAG Grading Scraping Pipeline'
     )
     
-    parser.add_argument('--categories', nargs='+', help='Categories to scrape')
-    parser.add_argument('--discover-categories', action='store_true', help='Discover categories')
+    parser.add_argument('--categories', nargs='+', help='Categories to scrape (default: auto-discover all)')
+    parser.add_argument('--discover-categories', action='store_true', help='Explicitly discover categories (this is now the default behavior)')
     parser.add_argument('--start-from', choices=['category', 'year', 'set', 'card', 'graderows'], default='category')
     parser.add_argument('--year-filter', nargs='+', help='Filter to specific years')
     parser.add_argument('--set-filter', nargs='+', help='Filter to specific sets')
@@ -388,8 +394,14 @@ def main():
     elif args.categories:
         categories = args.categories
     else:
-        categories = DEFAULT_CATEGORIES
-        logger.info(f"Using default categories: {categories}")
+        # Default to discovering all categories
+        categories = discover_categories()
+        logger.info(f"Auto-discovered {len(categories)} categories: {categories}")
+    
+    # Ensure we have categories to process
+    if not categories:
+        logger.error("No categories found to process!")
+        return 1
     
     # Run pipeline
     try:
