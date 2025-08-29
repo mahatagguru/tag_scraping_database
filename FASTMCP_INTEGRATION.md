@@ -23,16 +23,34 @@ FastMCP is a Python framework for building MCP (Model Context Protocol) servers 
 
 ## 🛠️ Installation
 
-### 1. Install FastMCP Dependencies
+### Option 1: Install FastMCP from GitHub (Recommended)
 
 ```bash
+# Install FastMCP directly from GitHub
+pip install git+https://github.com/jlowin/fastmcp.git
+
+# Or install from requirements
 pip install -r requirements_fastmcp.txt
 ```
 
-### 2. Verify Installation
+### Option 2: Use Official MCP SDK
 
 ```bash
+# Install the official MCP Python SDK
+pip install mcp
+
+# Use the alternative server
+python src/mcp_server_official.py
+```
+
+### 3. Verify Installation
+
+```bash
+# For FastMCP
 python -c "import fastmcp; print('FastMCP installed successfully!')"
+
+# For Official MCP SDK
+python -c "import mcp; print('MCP SDK installed successfully!')"
 ```
 
 ## 🚀 Quick Start
@@ -336,6 +354,29 @@ To add new tools to the FastMCP server:
 2. **Connection Refused**: Check if server is running on correct port
 3. **Database Errors**: Verify database file exists and is accessible
 4. **Permission Errors**: Check file permissions for logs and data directories
+
+### Package Installation Issues
+
+#### **FastMCP Not Found**
+```bash
+# Error: No matching distribution found for fastmcp
+# Solution: Install from GitHub
+pip install git+https://github.com/jlowin/fastmcp.git
+```
+
+#### **MCP SDK Not Found**
+```bash
+# Error: No module named 'mcp'
+# Solution: Install official SDK
+pip install mcp
+```
+
+#### **Alternative: Use Official MCP SDK**
+If FastMCP installation fails, use the official MCP server:
+```bash
+pip install mcp
+python src/mcp_server_official.py
+```
 
 ### Debug Mode
 

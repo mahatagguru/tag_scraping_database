@@ -1,9 +1,15 @@
 # FastMCP Integration Requirements
-fastmcp>=2.0.0
+# Install FastMCP from GitHub: pip install git+https://github.com/jlowin/fastmcp.git
+# Or use the official MCP SDK: pip install mcp
 
 # Core dependencies (if not already in main requirements.txt)
 typing-extensions>=4.0.0
 pathlib2>=2.3.0; python_version < "3.4"
 
-# Optional: Enhanced MCP features
-# mcp>=1.0.0  # Official MCP SDK (if you want to use both)
+# Official MCP SDK (alternative to FastMCP)
+mcp>=1.0.0
+
+# FastMCP dependencies
+pydantic>=2.0.0
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0

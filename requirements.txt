@@ -47,8 +47,8 @@ pydantic-settings>=2.0.0,<3.0.0
 asyncio-mqtt>=0.13.0,<1.0.0
 aiofiles>=23.0.0,<24.0.0
 
-# FastMCP Integration
-fastmcp>=2.0.0,<3.0.0
+# FastMCP Integration (install from GitHub)
+# pip install git+https://github.com/jlowin/fastmcp.git
 
 # Build and packaging
 build>=0.10.0,<1.0.0
