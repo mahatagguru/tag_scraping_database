@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-myuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mypassword}
+      POSTGRES_DB: ${POSTGRES_DB:-mydatabase}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-myuser} -d ${POSTGRES_DB:-mydatabase}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  scraper:
+    build: .
+    environment:
+      # Database connection
+      POSTGRES_DSN: postgresql+psycopg2://${POSTGRES_USER:-myuser}:${POSTGRES_PASSWORD:-mypassword}@db:5432/${POSTGRES_DB:-mydatabase}
+      
+      # Pipeline configuration
+      PIPELINE_MAX_CONCURRENCY: ${PIPELINE_MAX_CONCURRENCY:-3}
+      PIPELINE_DELAY: ${PIPELINE_DELAY:-1.0}
+      PIPELINE_CATEGORIES: ${PIPELINE_CATEGORIES:-Baseball,Hockey,Basketball,Football}
+      
+      # Scheduling configuration
+      PIPELINE_SCHEDULE: ${PIPELINE_SCHEDULE:-0 2 * * 0}  # Default: Sundays at 2 AM
+      PIPELINE_TIMEZONE: ${PIPELINE_TIMEZONE:-UTC}
+      
+      # Logging configuration
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      
+      # Health check
+      HEALTH_CHECK_INTERVAL: ${HEALTH_CHECK_INTERVAL:-300}  # 5 minutes
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    command: ["/app/bin/run.sh"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
