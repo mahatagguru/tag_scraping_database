@@ -19,6 +19,9 @@ jobs:
   lint:
     name: Lint and Format Check
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tool: [black, isort, flake8, mypy, pylint]
     
     steps:
     - name: Checkout code
@@ -34,39 +37,49 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 black isort mypy pylint
         
-    - name: Check code formatting with Black
+    - name: Run ${{ matrix.tool }}
       run: |
-        black --check --diff src/ tests/ --line-length 88
-        
-    - name: Check import sorting with isort
-      run: |
-        isort --check-only --diff src/ tests/
-        
-    - name: Lint with flake8
-      run: |
-        flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
-        
-    - name: Type check with mypy
-      run: |
-        mypy src/ --ignore-missing-imports --no-strict-optional
-        
-    - name: Lint with pylint
-      run: |
-        pylint src/ --disable=C0114,C0115,C0116 --max-line-length=88
+        case "${{ matrix.tool }}" in
+          "black")
+            black --check --diff src/ tests/ --line-length 88
+            ;;
+          "isort")
+            isort --check-only --diff src/ tests/
+            ;;
+          "flake8")
+            flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+            ;;
+          "mypy")
+            mypy src/ --ignore-missing-imports --no-strict-optional
+            ;;
+          "pylint")
+            pylint src/ --disable=C0114,C0115,C0116 --max-line-length=88
+            ;;
+        esac
 
   # Unit tests with SQLite
   test-sqlite:
     name: Test with SQLite
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+        include:
+          - python-version: '3.9'
+            test-name: 'SQLite Tests'
+          - python-version: '3.10'
+            test-name: 'SQLite Tests'
+          - python-version: '3.11'
+            test-name: 'SQLite Tests'
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
       
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ matrix.python-version }}
         
     - name: Install dependencies
       run: |
@@ -186,6 +199,9 @@ jobs:
   security:
     name: Security Checks
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tool: [safety, bandit]
     
     steps:
     - name: Checkout code
@@ -201,13 +217,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install safety bandit
         
-    - name: Check for known security vulnerabilities
+    - name: Run ${{ matrix.tool }} security check
       run: |
-        safety check --json --output safety-report.json || true
-        
-    - name: Run security linter
-      run: |
-        bandit -r src/ -f json -o bandit-report.json || true
+        case "${{ matrix.tool }}" in
+          "safety")
+            safety check --json --output safety-report.json || true
+            ;;
+          "bandit")
+            bandit -r src/ -f json -o bandit-report.json || true
+            ;;
+        esac
         
     - name: Upload security reports
       uses: actions/upload-artifact@v4
