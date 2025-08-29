@@ -9,10 +9,7 @@ on:
     # Run daily at 2 AM UTC to catch any issues
     - cron: '0 2 * * *'
 
-env:
-  PYTHON_VERSION: '3.9'
-  POSTGRES_VERSION: '13'
-  SQLITE_VERSION: '3'
+# Environment variables are now hardcoded in each job for better reliability
 
 jobs:
   # Lint and format check
@@ -106,7 +103,7 @@ jobs:
     
     services:
       postgres:
-        image: postgres:${{ env.POSTGRES_VERSION }}
+        image: postgres:13
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
@@ -123,10 +120,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
+    - name: Set up Python 3.9
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: '3.9'
         
     - name: Install PostgreSQL dependencies
       run: |
@@ -175,10 +172,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
+    - name: Set up Python 3.9
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: '3.9'
         
     - name: Install dependencies
       run: |
@@ -207,10 +204,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
+    - name: Set up Python 3.9
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: '3.9'
         
     - name: Install security tools
       run: |
@@ -246,10 +243,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
+    - name: Set up Python 3.9
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: '3.9'
         
     - name: Install build dependencies
       run: |
