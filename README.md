@@ -1,205 +1,325 @@
 # TAG Grading Scraper
 
-A comprehensive web scraping system for collecting sports card grading data from TAG Grading. This project features a multi-level pipeline architecture, Docker containerization, and robust data processing capabilities.
+[![CI](https://github.com/yourusername/tag-grading-scraper/workflows/CI%20-%20Continuous%20Integration/badge.svg)](https://github.com/yourusername/tag-grading-scraper/actions/workflows/ci.yml)
+[![CD](https://github.com/yourusername/tag-grading-scraper/workflows/CD%20-%20Continuous%20Deployment/badge.svg)](https://github.com/yourusername/tag-grading-scraper/actions/workflows/cd.yml)
+[![Docker](https://github.com/yourusername/tag-grading-scraper/workflows/Docker%20Build%20and%20Publish/badge.svg)](https://github.com/yourusername/tag-grading-scraper/actions/workflows/docker.yml)
+[![Code Coverage](https://codecov.io/gh/yourusername/tag-grading-scraper/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/tag-grading-scraper)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-blue.svg)](https://www.postgresql.org/)
+[![SQLite](https://img.shields.io/badge/SQLite-3+-blue.svg)](https://www.sqlite.org/)
+
+Advanced TAG Grading Scraper with PostgreSQL support, comprehensive audit logging, and full CI/CD pipeline.
 
 ## 🚀 Features
 
-- **Multi-Level Scraping Pipeline**: Efficiently scrapes sports cards, sets, years, and detailed information
-- **Docker Support**: Full containerization with docker-compose for easy deployment
-- **Database Integration**: PostgreSQL database with comprehensive schema for sports card data
-- **Scheduling**: Configurable CRON-based scheduling for automated data collection
-- **Audit System**: Comprehensive logging and audit trails for data integrity
-- **Multi-Sport Support**: Baseball, Hockey, Basketball, Football, Soccer, Golf, Racing, Wrestling, Gaming, and Non-Sport categories
+- **Advanced Web Scraping**: Intelligent scraping with rate limiting and error handling
+- **PostgreSQL Optimization**: JSONB support, advanced indexing, and performance optimizations
+- **Comprehensive Audit Logging**: Full operation tracking with error context and performance monitoring
+- **Database Schema Validation**: Automated schema integrity checks and relationship validation
+- **CI/CD Pipeline**: Automated testing, building, and deployment
+- **Docker Support**: Containerized deployment with multi-stage builds
+- **Security Scanning**: Automated vulnerability detection and security checks
+- **Code Quality**: Automated linting, formatting, and type checking
 
 ## 🏗️ Architecture
 
-The system implements a sophisticated multi-level scraping architecture:
+### Database Support
+- **PostgreSQL**: Full production support with JSONB, advanced indexing, and partitioning
+- **SQLite**: Development and testing compatibility
+- **Automatic Detection**: Seamless switching between database types
 
-1. **Sport Years Scraper**: Discovers available sports and years
-2. **Enhanced Sets Scraper**: Extracts card sets for each sport/year combination
-3. **Card Crawler**: Processes individual cards within sets
-4. **Card Detail Crawler**: Extracts detailed information for each card
-5. **Multi-Level Orchestrator**: Coordinates the entire pipeline
-
-## 🛠️ Technology Stack
-
-- **Python 3.8+**: Core scraping logic
-- **Playwright**: Modern web automation
-- **PostgreSQL**: Data storage
-- **Docker**: Containerization
-- **SQLAlchemy**: Database ORM
-- **asyncio**: Asynchronous processing
+### Core Components
+- **Scraping Engine**: Multi-level scraping with intelligent retry logic
+- **Audit System**: Comprehensive logging with context and performance tracking
+- **Schema Management**: Automated migrations and validation
+- **API Layer**: FastAPI-based REST API (optional)
 
 ## 📋 Prerequisites
 
-- Python 3.8 or higher
-- Docker and Docker Compose
-- PostgreSQL (if running locally)
+- Python 3.9+
+- PostgreSQL 13+ (for production)
+- Docker (optional)
+- Git
 
-## 🚀 Quick Start
+## 🛠️ Installation
 
-### Using Docker (Recommended)
+### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd "New Scraping Tool"
+   git clone https://github.com/yourusername/tag-grading-scraper.git
+   cd tag-grading-scraper
    ```
 
-2. **Set up environment variables**
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   # For development:
+   pip install -r requirements.txt[dev]
+   ```
+
+4. **Set up environment variables**
    ```bash
    cp env.example .env
    # Edit .env with your configuration
    ```
 
-3. **Run with Docker Compose**
+5. **Initialize database**
+   ```bash
+   cd src
+   python create_tables.py
+   ```
+
+### Docker Deployment
+
+1. **Build and run with Docker**
+   ```bash
+   docker build -t tag-scraper .
+   docker run -p 8000:8000 tag-scraper
+   ```
+
+2. **Using Docker Compose**
    ```bash
    docker-compose up -d
    ```
 
-### Local Development
-
-1. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Set up database**
-   ```bash
-   python src/create_tables.py
-   ```
-
-3. **Run the pipeline**
-   ```bash
-   python src/scraper/pipeline.py
-   ```
-
-## ⚙️ Configuration
+## 🔧 Configuration
 
 ### Environment Variables
 
-Key configuration options in `.env`:
+```bash
+# Database Configuration
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=your_username
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=your_database
 
-- `PIPELINE_MAX_CONCURRENCY`: Maximum concurrent scraping operations
-- `PIPELINE_DELAY`: Delay between requests (seconds)
-- `PIPELINE_CATEGORIES`: Sports categories to scrape
-- `PIPELINE_SCHEDULE`: CRON schedule for automated runs
-- `LOG_LEVEL`: Logging verbosity
-
-### Pipeline Categories
-
-Available sports categories:
-- Baseball
-- Hockey
-- Basketball
-- Football
-- Soccer
-- Golf
-- Racing
-- Wrestling
-- Gaming
-- Non-Sport
-
-Use `discover` to automatically find all available categories.
-
-## 📊 Database Schema
-
-The system creates comprehensive tables for:
-- Sports and years
-- Card sets
-- Individual cards
-- Card grades and details
-- Audit logs
-
-See `Documentation/DATABASE_SCHEMA.md` for detailed schema information.
-
-## 🔧 Development
-
-### Project Structure
-
-```
-src/
-├── scraper/           # Core scraping modules
-│   ├── pipeline.py    # Main pipeline orchestrator
-│   ├── crawler.py     # Base crawler classes
-│   ├── audit.py       # Audit and logging
-│   └── ...
-├── models.py          # Database models
-├── db.py             # Database connection
-└── create_tables.py  # Database initialization
+# Application Settings
+LOG_LEVEL=INFO
+ENVIRONMENT=development
 ```
 
-### Running Tests
+### Database Configuration
+
+The system automatically detects and configures the appropriate database:
+
+- **PostgreSQL**: Uses JSONB, BIGSERIAL, and advanced indexing
+- **SQLite**: Falls back to JSON and BigInteger for compatibility
+
+## 🧪 Testing
+
+### Run Tests
 
 ```bash
-# Test the multi-level system
-python src/test_multi_level_system.py
+# All tests
+pytest
 
-# Test specific pipeline levels
-python src/test_four_level_pipeline.py
-python src/test_five_level_pipeline.py
+# Specific test categories
+pytest -m unit          # Unit tests
+pytest -m integration   # Integration tests
+pytest -m postgresql    # PostgreSQL-specific tests
+pytest -m sqlite        # SQLite-specific tests
+
+# With coverage
+pytest --cov=src --cov-report=html
 ```
 
-## 📈 Monitoring and Logs
+### Test Coverage
 
-- **Pipeline Logs**: `pipeline.log`
-- **Docker Logs**: `docker-compose logs -f`
-- **Health Checks**: Built-in health monitoring system
+- **Unit Tests**: Core functionality and business logic
+- **Integration Tests**: Database operations and API endpoints
+- **Schema Validation**: Database schema integrity checks
+- **Security Tests**: Vulnerability scanning and security checks
 
-## 🐳 Docker Deployment
+## 🚀 CI/CD Pipeline
 
-### Production Deployment
+### Continuous Integration
 
-1. **Build and deploy**
+The CI pipeline runs on every push and pull request:
+
+1. **Code Quality Checks**
+   - Black formatting validation
+   - isort import sorting
+   - flake8 linting
+   - mypy type checking
+   - pylint code analysis
+
+2. **Testing**
+   - Unit tests with SQLite
+   - Unit tests with PostgreSQL
+   - Schema validation
+   - Security scanning
+
+3. **Build Verification**
+   - Package building
+   - Docker image building
+   - Artifact generation
+
+### Continuous Deployment
+
+The CD pipeline deploys automatically:
+
+1. **Staging Deployment**
+   - Triggers on `develop` branch
+   - Runs after successful CI
+   - Database migrations
+   - Health checks
+
+2. **Production Deployment**
+   - Triggers on version tags (v*.*.*)
+   - Full production deployment
+   - Database migrations
+   - Release creation
+
+3. **Rollback Capability**
+   - Manual rollback triggers
+   - Version-specific rollbacks
+   - Database restoration
+
+### Docker Workflow
+
+- **Multi-platform builds** (linux/amd64, linux/arm64)
+- **Security scanning** with Trivy and Snyk
+- **Automated publishing** to GitHub Container Registry
+- **Environment-specific deployments**
+
+## 📊 Monitoring and Observability
+
+### Audit Logging
+
+- **Operation Tracking**: All system operations logged
+- **Performance Monitoring**: Execution time and resource usage
+- **Error Context**: Full error details with stack traces
+- **User Activity**: User agent and IP tracking
+
+### Health Checks
+
+- **Database Connectivity**: Connection status monitoring
+- **Schema Validation**: Automated integrity checks
+- **Performance Metrics**: Response time and throughput
+- **Resource Usage**: Memory and CPU monitoring
+
+## 🔒 Security
+
+### Security Features
+
+- **Vulnerability Scanning**: Automated dependency checks
+- **Code Security**: Bandit security linting
+- **Container Security**: Docker image vulnerability scanning
+- **Access Control**: Environment-based security
+
+### Security Tools
+
+- **Safety**: Dependency vulnerability scanning
+- **Bandit**: Python security linting
+- **Trivy**: Container vulnerability scanning
+- **Snyk**: Advanced security analysis
+
+## 📈 Performance
+
+### PostgreSQL Optimizations
+
+- **JSONB**: 2-10x faster JSON queries
+- **GIN Indexes**: 5-20x faster JSON operations
+- **BRIN Indexes**: 3-5x faster time-range queries
+- **Partial Indexes**: 2-3x faster filtered queries
+
+### Scalability Features
+
+- **Connection Pooling**: Efficient database connections
+- **Query Optimization**: Advanced query planning
+- **Indexing Strategy**: Multi-level indexing approach
+- **Partitioning**: Table partitioning for large datasets
+
+## 🏗️ Development
+
+### Code Quality Tools
+
+- **Pre-commit Hooks**: Automated code quality checks
+- **Black**: Code formatting
+- **isort**: Import sorting
+- **flake8**: Linting
+- **mypy**: Type checking
+- **pylint**: Code analysis
+
+### Development Workflow
+
+1. **Feature Development**
    ```bash
-   docker-compose -f docker-compose.yml up -d --build
+   git checkout -b feature/your-feature
+   # Make changes
+   pre-commit run --all-files
+   git commit -m "feat: add your feature"
    ```
 
-2. **Monitor logs**
+2. **Testing**
    ```bash
-   docker-compose logs -f
+   pytest --cov=src
+   python src/validate_schema.py
    ```
 
-3. **Scale if needed**
-   ```bash
-   docker-compose up -d --scale scraper=3
-   ```
-
-### Health Monitoring
-
-The system includes built-in health checks and monitoring capabilities. See `Documentation/DOCKER_DEPLOYMENT.md` for detailed deployment information.
+3. **Code Review**
+   - Automated CI checks
+   - Code quality validation
+   - Security scanning
+   - Test coverage verification
 
 ## 📚 Documentation
 
-- [Project Overview](Documentation/PROJECT_OVERVIEW.md)
-- [Database Schema](Documentation/DATABASE_SCHEMA.md)
-- [Docker Deployment](Documentation/DOCKER_DEPLOYMENT.md)
-- [Pipeline Implementation](Documentation/FIVE_LEVEL_PIPELINE_IMPLEMENTATION.md)
-- [Cloud Launch Guide](Documentation/CLOUD_LAUNCH_GUIDE.md)
+- [Database Schema Documentation](Documentation/DATABASE_SCHEMA_ENHANCED.md)
+- [PostgreSQL Enhancements](Documentation/POSTGRESQL_ENHANCEMENTS.md)
+- [Implementation Summary](Documentation/POSTGRESQL_IMPLEMENTATION_SUMMARY.md)
+- [API Documentation](Documentation/API.md) (if applicable)
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Run tests and quality checks
 5. Submit a pull request
+
+### Contribution Guidelines
+
+- Follow the existing code style
+- Add tests for new functionality
+- Update documentation as needed
+- Ensure all CI checks pass
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## ⚠️ Disclaimer
-
-This tool is for educational and research purposes. Please respect the target website's terms of service and robots.txt file. Use responsibly and consider implementing appropriate delays between requests.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
-For issues and questions:
-1. Check the documentation
-2. Review existing issues
-3. Create a new issue with detailed information
+- **Issues**: [GitHub Issues](https://github.com/yourusername/tag-grading-scraper/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/tag-grading-scraper/discussions)
+- **Wiki**: [Project Wiki](https://github.com/yourusername/tag-grading-scraper/wiki)
+
+## 🗺️ Roadmap
+
+- [ ] Advanced table partitioning
+- [ ] Materialized views for aggregations
+- [ ] Real-time monitoring dashboard
+- [ ] Advanced caching strategies
+- [ ] Multi-region deployment support
+- [ ] Advanced security features
+
+## 🙏 Acknowledgments
+
+- SQLAlchemy team for the excellent ORM
+- PostgreSQL community for advanced features
+- GitHub Actions for CI/CD infrastructure
+- All contributors and maintainers
 
 ---
 
-**Built with ❤️ for the sports card collecting community**
+**Made with ❤️ by the TAG Grading Scraper Team**

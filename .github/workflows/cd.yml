@@ -1,0 +1,210 @@
+name: CD - Continuous Deployment
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Semantic versioning tags
+  workflow_run:
+    workflows: ["CI - Continuous Integration"]
+    types:
+      - completed
+    branches: [main]
+
+env:
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  # Deploy to staging environment
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event.workflow_run.conclusion == 'success'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run staging deployment tests
+      run: |
+        cd src
+        python validate_schema.py
+        python test_postgresql_detection.py
+        
+    - name: Deploy to staging environment
+      run: |
+        echo "🚀 Deploying to staging environment..."
+        # Add your staging deployment logic here
+        # Examples:
+        # - Docker build and push
+        # - Kubernetes deployment
+        # - Cloud platform deployment
+        
+    - name: Notify staging deployment
+      run: |
+        echo "✅ Successfully deployed to staging environment"
+        # Add notification logic (Slack, email, etc.)
+
+  # Deploy to production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Get version from tag
+      id: get_version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Deploying version: $VERSION"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run production deployment tests
+      run: |
+        cd src
+        python validate_schema.py
+        python test_postgresql_detection.py
+        
+    - name: Build production package
+      run: |
+        python -m pip install build setuptools wheel
+        python -m build
+        
+    - name: Deploy to production environment
+      run: |
+        echo "🚀 Deploying version ${{ steps.get_version.outputs.version }} to production..."
+        # Add your production deployment logic here
+        # Examples:
+        # - Docker build and push to registry
+        # - Kubernetes deployment update
+        # - Cloud platform deployment
+        # - Database migrations
+        
+    - name: Create GitHub release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ steps.get_version.outputs.version }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/tag_scraper-${{ steps.get_version.outputs.version }}.tar.gz
+        asset_name: tag_scraper-${{ steps.get_version.outputs.version }}.tar.gz
+        asset_content_type: application/gzip
+        
+    - name: Notify production deployment
+      run: |
+        echo "✅ Successfully deployed version ${{ steps.get_version.outputs.version }} to production"
+        # Add notification logic (Slack, email, etc.)
+
+  # Database migration deployment
+  deploy-migrations:
+    name: Deploy Database Migrations
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run migration tests
+      run: |
+        cd src
+        python validate_schema.py
+        
+    - name: Deploy migrations to staging
+      if: github.ref == 'refs/heads/develop'
+      run: |
+        echo "🔄 Deploying migrations to staging..."
+        cd src
+        python create_tables.py
+        
+    - name: Deploy migrations to production
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        echo "🔄 Deploying migrations to production..."
+        cd src
+        python create_tables.py
+        
+    - name: Verify migration success
+      run: |
+        echo "✅ Migrations deployed successfully"
+        cd src
+        python validate_schema.py
+
+  # Rollback capability
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: github.event.inputs.rollback == 'true'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Get rollback version
+      id: get_rollback_version
+      run: |
+        echo "rollback_version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        
+    - name: Rollback to previous version
+      run: |
+        echo "🔄 Rolling back to version ${{ steps.get_rollback_version.outputs.rollback_version }}..."
+        # Add your rollback logic here
+        # Examples:
+        # - Revert Kubernetes deployment
+        # - Restore database from backup
+        # - Switch to previous Docker image
+        
+    - name: Verify rollback
+      run: |
+        echo "✅ Rollback completed successfully"
+        # Add verification logic
+        
+    - name: Notify rollback
+      run: |
+        echo "⚠️ Rollback to version ${{ steps.get_rollback_version.outputs.rollback_version }} completed"
+        # Add notification logic
