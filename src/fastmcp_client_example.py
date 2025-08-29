@@ -52,6 +52,40 @@ async def main():
         })
         print(f"Baseball Years: {json.dumps(years_result, indent=2)}")
         
+        # Example 6: Get card totals by type
+        print("\n📊 Getting card totals by type...")
+        totals_result = await client.call_tool("get_card_totals_by_type", {
+            "card_type": "rookie",
+            "sport": "baseball"
+        })
+        print(f"Card Totals: {json.dumps(totals_result, indent=2)}")
+        
+        # Example 7: Analyze card scores
+        print("\n⭐ Analyzing card scores...")
+        scores_result = await client.call_tool("get_card_scores_analysis", {
+            "min_score": 9.0,
+            "sport": "baseball"
+        })
+        print(f"Score Analysis: {json.dumps(scores_result, indent=2)}")
+        
+        # Example 8: Get player collection
+        print("\n👤 Getting player collection...")
+        player_result = await client.call_tool("get_player_card_collection", {
+            "player_name": "Mike Trout",
+            "sport": "baseball",
+            "min_grade": 9.0
+        })
+        print(f"Player Collection: {json.dumps(player_result, indent=2)}")
+        
+        # Example 9: Market trends analysis
+        print("\n📈 Analyzing market trends...")
+        trends_result = await client.call_tool("get_market_trends_analysis", {
+            "days": 30,
+            "sport": "baseball",
+            "card_type": "rookie"
+        })
+        print(f"Market Trends: {json.dumps(trends_result, indent=2)}")
+        
     except Exception as e:
         print(f"❌ Error: {e}")
     

@@ -48,14 +48,29 @@ The server will start on `localhost:8000` and expose the following tools:
 
 ### Available Tools
 
+#### 🔍 Scraping Tools
 | Tool | Description | Parameters |
 |------|-------------|------------|
 | `scrape_sport_years` | Scrape available years for a sport | `sport` (string) |
 | `scrape_sets_for_year` | Scrape sets for a sport/year | `sport`, `year` |
 | `scrape_cards_for_set` | Scrape cards for a specific set | `set_name`, `limit` |
-| `get_database_stats` | Get database statistics | None |
-| `search_cards` | Search for cards in database | `query`, `limit` |
 | `run_full_pipeline` | Run complete scraping pipeline | `sport`, `year`, `set_name` |
+
+#### 📊 Analytics & Statistics
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `get_database_stats` | Get database statistics | None |
+| `get_card_totals_by_type` | Get card totals by type/sport/year | `card_type`, `sport`, `year` |
+| `get_card_scores_analysis` | Analyze card scores and grades | `min_score`, `max_score`, `sport` |
+| `get_card_value_analysis` | Analyze card values and market data | `min_value`, `max_value`, `grade` |
+| `get_set_completion_status` | Check set completion status | `set_name`, `sport`, `year` |
+| `get_player_card_collection` | Get player's card collection | `player_name`, `sport`, `min_grade` |
+| `get_market_trends_analysis` | Analyze market trends and prices | `days`, `sport`, `card_type` |
+
+#### 🔍 Search & Query
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `search_cards` | Search for cards in database | `query`, `limit` |
 | `get_available_sports` | Get list of available sports | None |
 | `get_pipeline_status` | Get pipeline status | None |
 
@@ -179,6 +194,57 @@ result = await client.call_tool("run_full_pipeline", {
 results = await client.call_tool("search_cards", {
     "query": "Mike Trout",
     "limit": 20
+})
+```
+
+### 4. Card Analytics
+
+```python
+# Get card totals by type
+totals = await client.call_tool("get_card_totals_by_type", {
+    "card_type": "rookie",
+    "sport": "baseball",
+    "year": "2023"
+})
+
+# Analyze card scores
+scores = await client.call_tool("get_card_scores_analysis", {
+    "min_score": 9.0,
+    "sport": "baseball"
+})
+
+# Check set completion
+completion = await client.call_tool("get_set_completion_status", {
+    "set_name": "2023 Topps Baseball",
+    "sport": "baseball"
+})
+```
+
+### 5. Player Collections
+
+```python
+# Get player's card collection
+collection = await client.call_tool("get_player_card_collection", {
+    "player_name": "Mike Trout",
+    "sport": "baseball",
+    "min_grade": 9.0
+})
+```
+
+### 6. Market Analysis
+
+```python
+# Analyze market trends
+trends = await client.call_tool("get_market_trends_analysis", {
+    "days": 30,
+    "sport": "baseball",
+    "card_type": "rookie"
+})
+
+# Get value analysis
+values = await client.call_tool("get_card_value_analysis", {
+    "min_value": 100.0,
+    "grade": "9.5"
 })
 ```
 
