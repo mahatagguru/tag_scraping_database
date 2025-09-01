@@ -117,7 +117,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
       
+    - name: Check if image exists in registry
+      id: check-image
+      run: |
+        echo "Checking if image exists in registry..."
+        if docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null; then
+          echo "image_exists=true" >> $GITHUB_OUTPUT
+          echo "✅ Image found in registry"
+        else
+          echo "image_exists=false" >> $GITHUB_OUTPUT
+          echo "⚠️ Image not found in registry, skipping security scan"
+        fi
+        
     - name: Run Trivy vulnerability scanner
+      id: trivy
+      if: steps.check-image.outputs.image_exists == 'true'
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
@@ -126,11 +140,12 @@ jobs:
         
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
-      if: always()
+      if: always() && steps.trivy.outcome == 'success'
       with:
         sarif_file: 'trivy-results.sarif'
         
     - name: Run Snyk container scan
+      if: steps.check-image.outputs.image_exists == 'true' && env.SNYK_TOKEN != ''
       uses: snyk/actions/docker@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
