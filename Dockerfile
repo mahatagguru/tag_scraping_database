@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for TAG Grading Scraper
 # Stage 1: Build stage
-FROM python:3.9-slim as builder
+FROM python:3.9-slim AS builder
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -25,7 +25,7 @@ RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Stage 2: Runtime stage
-FROM python:3.9-slim as runtime
+FROM python:3.9-slim AS runtime
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
