@@ -16,7 +16,7 @@ import os
 import sys
 
 # Add project root to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from scraper.card_grade_rows_scraper import extract_grade_rows_from_url
 from scraper.cards_scraper import extract_cards_from_url

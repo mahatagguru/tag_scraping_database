@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 from fastmcp import FastMCP
 
 # Add the src directory to the path to import our modules
-sys.path.append(str(Path(__file__).parent))
+sys.path.append(str(Path(__file__).parent.parent))
 
 from db import get_db_connection
 from models import *

@@ -11,7 +11,7 @@ import sys
 from typing import Any, Dict, List, Optional
 
 # Add the src directory to the path to import our modules
-sys.path.append(str(Path(__file__).parent))
+sys.path.append(str(Path(__file__).parent.parent))
 
 try:
     from mcp import Server, StdioServerParameters

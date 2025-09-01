@@ -9,7 +9,7 @@ import os
 import sys
 
 # Add project root to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from scraper.enhanced_sets_scraper import extract_sets_from_url
 from scraper.sport_years_scraper import extract_years_from_url

@@ -17,7 +17,7 @@ import sys
 import time
 
 # Add src to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 def test_unified_pipeline_basic():
     """Test 1: Basic unified pipeline functionality"""
