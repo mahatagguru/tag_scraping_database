@@ -459,13 +459,13 @@ class SchemaValidator:
         print("DATABASE SCHEMA VALIDATION REPORT")
         print("="*80)
         
-        print(f"\nSUMMARY:")
+        print("\nSUMMARY:")
         print(f"  Total Checks: {summary['total_checks']}")
         print(f"  Passed: {summary['passed']} ({summary['success_rate']:.1f}%)")
         print(f"  Errors: {summary['errors']}")
         print(f"  Warnings: {summary['warnings']}")
         print(f"  Info: {summary['info']}")
-        
+
         if summary['errors'] > 0:
             print(f"\nERRORS ({summary['errors']}):")
             for error in summary['validation_results']['errors']:
@@ -473,7 +473,7 @@ class SchemaValidator:
                 if error['details']:
                     for key, value in error['details'].items():
                         print(f"      {key}: {value}")
-        
+
         if summary['warnings'] > 0:
             print(f"\nWARNINGS ({summary['warnings']}):")
             for warning in summary['validation_results']['warnings']:
@@ -481,26 +481,28 @@ class SchemaValidator:
                 if warning['details']:
                     for key, value in warning['details'].items():
                         print(f"      {key}: {value}")
-        
+
         if summary['info'] > 0:
             print(f"\nINFO ({summary['info']}):")
             for info in summary['validation_results']['info']:
                 print(f"  ℹ️  {info['message']}")
-        
+
         print(f"\nPASSED CHECKS ({summary['passed']}):")
-        for passed in summary['validation_results']['passed'][:10]:  # Show first 10
+        # Show first 10 passed checks
+        for passed in summary['validation_results']['passed'][:10]:
             print(f"  ✅ {passed['message']}")
-        
+
         if summary['passed'] > 10:
             print(f"  ... and {summary['passed'] - 10} more passed checks")
-        
+
         print("\n" + "="*80)
         
         if summary['errors'] == 0 and summary['warnings'] == 0:
             print("🎉 SCHEMA VALIDATION PASSED - All checks successful!")
         elif summary['errors'] == 0:
             print("⚠️  SCHEMA VALIDATION PASSED WITH WARNINGS - Review warnings above")
-            print("💡 For new projects, missing tables are normal. Run 'python src/setup_database.py' to set up the database.")
+            print("💡 For new projects, missing tables are normal. "
+                  "Run 'python src/setup_database.py' to set up the database.")
         else:
             print("❌ SCHEMA VALIDATION FAILED - Fix errors above before proceeding")
 
@@ -522,7 +524,7 @@ def main():
             return 0  # Don't fail CI for missing tables
         else:
             return 0
-            
+
     except Exception as e:
         logger.error(f"Validation failed with exception: {e}")
         print(f"\n❌ VALIDATION FAILED: {e}")
