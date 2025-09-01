@@ -67,4 +67,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 EXPOSE 8000
 
 # Default command
-CMD ["python", "src/main.py"]
+CMD ["python", "-m", "scraper.unified_pipeline", "--help"]

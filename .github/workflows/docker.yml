@@ -74,6 +74,14 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
+    - name: List built images
+      run: |
+        echo "Listing all Docker images:"
+        docker images
+        echo ""
+        echo "Looking for tag-scraping-tool images:"
+        docker images | grep tag-scraping-tool || echo "No tag-scraping-tool images found"
+        
     - name: Test Docker image
       run: |
         # Test the locally built image (always available)
