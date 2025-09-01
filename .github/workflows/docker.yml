@@ -60,33 +60,42 @@ jobs:
           type=semver,pattern={{version}}
           type=sha,prefix={{branch}}-
           
-    - name: Build Docker image
+    - name: Build Docker image (simple)
       id: build
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: ${{ github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true' }}
-        tags: |
-          tag-scraping-tool:local
-          ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    - name: List built images
       run: |
-        echo "Listing all Docker images:"
+        echo "Building Docker image with simple command..."
+        docker build -t tag-scraping-tool:local .
+        echo "Build completed, checking result..."
+        docker images | grep tag-scraping-tool || echo "No tag-scraping-tool images found"
+        
+    - name: List all images
+      run: |
+        echo "=== All Docker images ==="
         docker images
         echo ""
-        echo "Looking for tag-scraping-tool images:"
+        echo "=== Looking for our image ==="
         docker images | grep tag-scraping-tool || echo "No tag-scraping-tool images found"
+        echo ""
+        echo "=== Image details ==="
+        docker inspect tag-scraping-tool:local || echo "Image inspection failed"
         
     - name: Test Docker image
       run: |
         # Test the locally built image (always available)
         echo "Testing locally built image..."
         docker run --rm tag-scraping-tool:local python -c "print('Docker image test successful')"
+        
+    - name: Build and push to registry (if credentials available)
+      if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true'
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         
     - name: Upload Docker image as artifact
       if: github.event_name == 'pull_request'
