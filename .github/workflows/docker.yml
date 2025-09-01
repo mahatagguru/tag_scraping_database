@@ -60,56 +60,25 @@ jobs:
           type=semver,pattern={{version}}
           type=sha,prefix={{branch}}-
           
-    - name: Build Docker image (no push)
-      if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'false'
+    - name: Build Docker image
+      id: build
       uses: docker/build-push-action@v6
       with:
         context: .
         platforms: linux/amd64,linux/arm64
-        push: false
-        tags: tag-scraping-tool:local
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    - name: Build and push Docker image
-      if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true'
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    - name: Build Docker image (PR only)
-      if: github.event_name == 'pull_request'
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: false
-        tags: ${{ steps.meta.outputs.tags }}
+        push: ${{ github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true' }}
+        tags: |
+          tag-scraping-tool:local
+          ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
     - name: Test Docker image
       run: |
-        # Test the built image based on the scenario
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          echo "Testing PR image..."
-          # For PRs, use the first tag from metadata (usually branch name)
-          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
-          docker run --rm $IMAGE_TAG python -c "print('Docker image test successful')"
-        elif [ "${{ steps.check-credentials.outputs.has_credentials }}" == "true" ]; then
-          echo "Testing pushed image..."
-          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest python -c "print('Docker image test successful')"
-        else
-          echo "Testing local image..."
-          docker run --rm tag-scraping-tool:local python -c "print('Docker image test successful')"
-        fi
+        # Test the locally built image (always available)
+        echo "Testing locally built image..."
+        docker run --rm tag-scraping-tool:local python -c "print('Docker image test successful')"
         
     - name: Upload Docker image as artifact
       if: github.event_name == 'pull_request'
