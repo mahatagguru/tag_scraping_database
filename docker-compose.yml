@@ -44,7 +44,7 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
-    command: ["/app/bin/run.sh"]
+    command: ["/app/scripts/run.sh"]
     restart: unless-stopped
 
 volumes:

@@ -50,11 +50,13 @@ WORKDIR /app
 
 # Copy application code
 COPY --chown=appuser:appuser src/ ./src/
-COPY --chown=appuser:appuser Documentation/ ./Documentation/
+COPY --chown=appuser:appuser docs/ ./docs/
+COPY --chown=appuser:appuser scripts/ ./scripts/
 
-# Create necessary directories
+# Create necessary directories and make scripts executable
 RUN mkdir -p /app/logs /app/data && \
-    chown -R appuser:appuser /app/logs /app/data
+    chown -R appuser:appuser /app/logs /app/data && \
+    chmod +x /app/scripts/*.sh
 
 # Switch to non-root user
 USER appuser
