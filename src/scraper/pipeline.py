@@ -51,7 +51,14 @@ from scraper.sport_years_scraper import extract_years_from_url
 # Configuration
 BASE_URL = "https://my.taggrading.com"
 # Default to discovering all categories automatically
-DEFAULT_CATEGORIES = []  # Empty list means discover all categories
+DEFAULT_CATEGORIES = [
+    'Baseball', 'Basketball', 'Football', 'Hockey', 'MMA', 'Soccer', 'Racing', 
+    'Golf', 'Tennis', 'Boxing', 'Other Sports', 'Multi-Sport', 'Marvel/DC', 
+    'Star Wars', 'Fortnite', 'Garbage Pail Kids', 'Music', 'TV/Movies', 
+    'Wrestling', 'Video Games', 'Nature', 'Pop Culture', 'Disney', 'Pokémon', 
+    'Magic the Gathering', 'Dragon Ball', 'Metazoo', 'Weiß Schwarz', 'One Piece', 
+    'Lorcana', 'Digimon', 'Other TCG'
+]  # Complete list of all 33 categories
 MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 2.0
 RETRY_JITTER_MAX = 1.0
@@ -156,35 +163,63 @@ def retry_with_backoff(func, max_retries=MAX_RETRIES, backoff_base=RETRY_BACKOFF
 
 def discover_categories() -> List[str]:
     """
-    Dynamically discover available categories from the main page
+    Dynamically discover available categories by testing potential category URLs.
+    Falls back to known categories if dynamic discovery fails.
     
     Returns:
         List of category names
     """
     try:
         from selectolax.parser import HTMLParser
-
         from scraper.sport_years_scraper import fetch_rendered_html
         
-        html = fetch_rendered_html(f"{BASE_URL}/pop-report")
-        tree = HTMLParser(html)
+        # Test all known categories directly instead of relying on main page text
+        potential_categories = [
+            'Baseball', 'Basketball', 'Football', 'Hockey', 'MMA', 'Soccer', 'Racing', 
+            'Golf', 'Tennis', 'Boxing', 'Other Sports', 'Multi-Sport', 'Marvel/DC', 
+            'Star Wars', 'Fortnite', 'Garbage Pail Kids', 'Music', 'TV/Movies', 
+            'Wrestling', 'Video Games', 'Nature', 'Pop Culture', 'Disney', 'Pokémon', 
+            'Magic the Gathering', 'Dragon Ball', 'Metazoo', 'Weiß Schwarz', 'One Piece', 
+            'Lorcana', 'Digimon', 'Other TCG'
+        ]
         
-        # Extract category links (adjust selector as needed)
-        category_links = tree.css('a[href*="/pop-report/"]')
-        categories = []
+        # Test each potential category to see if it has years
+        working_categories = []
+        for category in potential_categories:
+            try:
+                # URL encode the category name for special characters
+                import urllib.parse
+                encoded_category = urllib.parse.quote(category, safe='')
+                url = f"{BASE_URL}/pop-report/{encoded_category}"
+                html = fetch_rendered_html(url)
+                tree = HTMLParser(html)
+
+                # Look for year links
+                year_links = tree.css('a[href*="/pop-report/"]')
+                year_count = 0
+
+                for link in year_links:
+                    href = link.attributes.get('href', '')
+                    # Check for year links - href contains the category name (either encoded or not) followed by a year
+                    if (f'/pop-report/{category}/' in href or f'/pop-report/{encoded_category}/' in href) and href.count('/') == 3:
+                        year_count += 1
+
+                if year_count > 0:
+                    working_categories.append(category)
+                    logger.debug(f"Category {category}: {year_count} years found")
+
+            except Exception as e:
+                logger.debug(f"Category {category} test failed: {e}")
         
-        for link in category_links:
-            href = link.attributes.get('href', '')
-            if href.startswith('/pop-report/') and href.count('/') == 2:
-                category = href.split('/')[-1]
-                if category and category not in categories:
-                    categories.append(category)
-        
-        logger.info(f"Discovered {len(categories)} categories: {categories}")
-        return categories
+        if working_categories:
+            logger.info(f"Discovered {len(working_categories)} working categories: {working_categories}")
+            return working_categories
+        else:
+            logger.warning("No working categories discovered dynamically. Using known categories.")
+            return DEFAULT_CATEGORIES
         
     except Exception as e:
-        logger.warning(f"Failed to discover categories: {e}. Using defaults.")
+        logger.warning(f"Failed to discover categories: {e}. Using known categories.")
         return DEFAULT_CATEGORIES
 
 

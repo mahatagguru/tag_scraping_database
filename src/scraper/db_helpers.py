@@ -19,6 +19,23 @@ from models import (
 )
 
 
+class DatabaseHelper:
+    """Database helper class for managing database operations."""
+    
+    def __init__(self):
+        self.session = None
+    
+    def get_session(self):
+        """Get a database session."""
+        from db import SessionLocal
+        return SessionLocal()
+    
+    def close_session(self, session):
+        """Close a database session."""
+        if session:
+            session.close()
+
+
 def upsert_category(session: Session, name: str, img: str = None):
     """
     Upsert a category by name. Returns the Category instance.

@@ -31,11 +31,11 @@ def test_postgresql_features():
     # Check if we're using PostgreSQL
     if 'sqlite' in str(engine.url):
         logger.warning("This test is designed for PostgreSQL. Current database: SQLite")
-        return False
+        assert False, "This test is designed for PostgreSQL. Current database: SQLite"
     
     if 'postgresql' not in str(engine.url):
         logger.warning("This test is designed for PostgreSQL. Current database: Unknown")
-        return False
+        assert False, "This test is designed for PostgreSQL. Current database: Unknown"
     
     logger.info("✅ PostgreSQL database detected")
     
@@ -66,11 +66,11 @@ def test_postgresql_features():
             partitioning_available = result.scalar()
             logger.info(f"Table partitioning available: {partitioning_available}")
             
-            return True
+            assert True, "PostgreSQL features test completed successfully"
             
     except SQLAlchemyError as e:
         logger.error(f"Error testing PostgreSQL features: {e}")
-        return False
+        assert False, f"PostgreSQL test failed: {e}"
 
 def test_enhanced_schema():
     """Test the enhanced schema with PostgreSQL features."""
@@ -99,11 +99,11 @@ def test_enhanced_schema():
                     elif col['name'] == 'id' and table_name == 'audit_logs':
                         logger.info(f"Column {col['name']} type: {col['type']}")
         
-        return True
+        assert True, "PostgreSQL test completed successfully"
         
     except SQLAlchemyError as e:
         logger.error(f"Error testing enhanced schema: {e}")
-        return False
+        assert False, f"PostgreSQL test failed: {e}"
 
 def test_audit_logging():
     """Test audit logging functionality with PostgreSQL."""
@@ -128,11 +128,11 @@ def test_audit_logging():
                              'Test stack trace', {'test': 'context'})
         
         logger.info("✅ Audit logging tests completed")
-        return True
+        assert True, "PostgreSQL test completed successfully"
         
     except Exception as e:
         logger.error(f"Error testing audit logging: {e}")
-        return False
+        assert False, f"PostgreSQL test failed: {e}"
 
 def test_jsonb_operations():
     """Test JSONB operations if available."""
@@ -187,11 +187,11 @@ def test_jsonb_operations():
             session.delete(test_log)
             session.commit()
             
-        return True
+        assert True, "PostgreSQL test completed successfully"
         
     except Exception as e:
         logger.error(f"Error testing JSONB operations: {e}")
-        return False
+        assert False, f"PostgreSQL test failed: {e}"
 
 def test_performance_features():
     """Test PostgreSQL performance features."""
@@ -251,11 +251,11 @@ def test_performance_features():
                 exists = result.scalar()
                 logger.info(f"Partial index {index_name}: {'✅' if exists else '❌'}")
             
-        return True
+        assert True, "PostgreSQL test completed successfully"
         
     except SQLAlchemyError as e:
         logger.error(f"Error testing performance features: {e}")
-        return False
+        assert False, f"PostgreSQL test failed: {e}"
 
 def main():
     """Main test function."""

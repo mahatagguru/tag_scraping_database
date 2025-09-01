@@ -43,8 +43,6 @@ except ImportError:
 from db import get_db_connection
 from models import *
 from scraper.db_helpers import DatabaseHelper
-from scraper.multi_level_orchestrator import MultiLevelOrchestrator
-from scraper.unified_pipeline import UnifiedPipeline
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -58,8 +56,6 @@ class TAGScraperMCPServer:
     
     def __init__(self):
         self.server = Server("TAG Grading Scraper 🏷️")
-        self.pipeline = UnifiedPipeline()
-        self.orchestrator = MultiLevelOrchestrator()
         
         # Register tools
         self._register_tools()

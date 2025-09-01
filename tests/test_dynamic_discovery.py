@@ -37,7 +37,8 @@ def test_dynamic_category_discovery():
         categories = discover_categories()
         print(f"✅ Discovered {len(categories)} categories: {categories}")
         
-        # Verify we have the expected categories
+
+        # Verify we have the expected core categories
         expected_categories = ['Baseball', 'Hockey', 'Basketball', 'Football']
         for expected in expected_categories:
             if expected in categories:
@@ -45,11 +46,22 @@ def test_dynamic_category_discovery():
             else:
                 print(f"   ❌ Missing expected category: {expected}")
         
-        return len(categories) > 0
+                # Verify we have additional categories
+        additional_categories = ['Soccer', 'Tennis', 'Golf', 'Wrestling', 'Boxing', 'MMA', 
+                                'Star Wars', 'Video Games', 'Music', 'Disney', 'Pokémon', 
+                                'Magic the Gathering', 'Dragon Ball', 'One Piece', 'Digimon']
+        for additional in additional_categories:
+            if additional in categories:
+                print(f"   ✅ Found additional category: {additional}")
+            else:
+                print(f"   ⚠️  Additional category not found: {additional}")
+
+        assert len(categories) > 0, f"Expected to find categories, but found {len(categories)}"
+        assert len(categories) >= 32, f"Expected at least 32 categories, but found {len(categories)}"
         
     except Exception as e:
         print(f"❌ Category discovery failed: {e}")
-        return False
+        assert False, f"Category discovery failed: {e}"
 
 def test_dynamic_year_discovery():
     """Test 2: Dynamic year discovery for Baseball"""
@@ -300,11 +312,11 @@ def test_database_storage():
         session.close()
         
         print("\n✅ All database storage tests passed!")
-        return True
+        assert True, "Database storage test completed successfully"
         
     except Exception as e:
         print(f"❌ Database storage test failed: {e}")
-        return False
+        assert False, f"Database storage test failed: {e}"
 
 def main():
     """Run all dynamic discovery tests"""

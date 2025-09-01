@@ -37,8 +37,8 @@ from scraper.db_helpers import (
 )
 from scraper.multi_level_orchestrator import MultiLevelOrchestrator
 from scraper.pipeline import discover_categories
-from src.db import SessionLocal
-from src.models import AuditLog
+from db import SessionLocal
+from models import AuditLog
 
 # Configuration
 BASE_URL = "https://my.taggrading.com"

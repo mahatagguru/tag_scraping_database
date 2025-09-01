@@ -46,6 +46,7 @@ class Category(Base):
     __table_args__ = (
         Index('ix_categories_name', 'name'),
         Index('ix_categories_active', 'is_active'),
+        {'extend_existing': True}
     )
 
 class Year(Base):
@@ -58,11 +59,11 @@ class Year(Base):
     
     # Constraints
     __table_args__ = (
-        
         UniqueConstraint('category_id', 'year', name='uq_category_year'),
         CheckConstraint('year >= 1800 AND year <= 2100', name='chk_year_range'),
         Index('ix_years_category_year', 'category_id', 'year'),
         Index('ix_years_active', 'is_active'),
+        {'extend_existing': True}
     )
     
     # Relationships
@@ -320,6 +321,7 @@ class SetsPerYear(Base):
     """Sets discovered per (sport, year)"""
     __tablename__ = 'sets_per_year'
     id = Column(Integer, primary_key=True)
+    year_index_id = Column(Integer, ForeignKey('years_index.id', ondelete='CASCADE'), nullable=True)
     sport = Column(Text, nullable=False)
     year = Column(Text, nullable=False)
     year_url = Column(Text, nullable=False)
@@ -332,6 +334,7 @@ class SetsPerYear(Base):
     # Constraints
     __table_args__ = (
         UniqueConstraint('sport', 'year', 'set_title', name='uq_sport_year_set'),
+        Index('ix_sets_per_year_year_index', 'year_index_id'),
         Index('ix_sets_per_year_sport_year', 'sport', 'year'),
         Index('ix_sets_per_year_set_title', 'set_title'),
         Index('ix_sets_per_year_active', 'is_active'),
@@ -346,6 +349,7 @@ class CardsPerSet(Base):
     """Cards discovered per (sport, year, set)"""
     __tablename__ = 'cards_per_set'
     id = Column(Integer, primary_key=True)
+    set_per_year_id = Column(Integer, ForeignKey('sets_per_year.id', ondelete='CASCADE'), nullable=True)
     sport = Column(Text, nullable=False)
     year = Column(Text, nullable=False)
     set_title = Column(Text, nullable=False)
@@ -359,6 +363,7 @@ class CardsPerSet(Base):
     # Constraints
     __table_args__ = (
         UniqueConstraint('sport', 'year', 'set_title', 'card_name', name='uq_sport_year_set_card'),
+        Index('ix_cards_per_set_set_per_year', 'set_per_year_id'),
         Index('ix_cards_per_set_sport_year_set', 'sport', 'year', 'set_title'),
         Index('ix_cards_per_set_card_name', 'card_name'),
         Index('ix_cards_per_set_active', 'is_active'),
@@ -373,6 +378,7 @@ class CardGradeRows(Base):
     """Individual grade rows for each card"""
     __tablename__ = 'card_grade_rows'
     id = Column(Integer, primary_key=True)
+    card_per_set_id = Column(Integer, ForeignKey('cards_per_set.id', ondelete='CASCADE'), nullable=True)
     sport = Column(Text, nullable=False)
     year = Column(Text, nullable=False)
     set_title = Column(Text, nullable=False)
@@ -393,6 +399,7 @@ class CardGradeRows(Base):
     # Constraints
     __table_args__ = (
         UniqueConstraint('sport', 'year', 'set_title', 'card_name', 'cert_number', name='uq_sport_year_set_card_cert'),
+        Index('ix_card_grade_rows_card_per_set', 'card_per_set_id'),
         Index('ix_card_grade_rows_sport_year_set_card', 'sport', 'year', 'set_title', 'card_name'),
         Index('ix_card_grade_rows_cert_number', 'cert_number'),
         Index('ix_card_grade_rows_tag_grade', 'tag_grade'),

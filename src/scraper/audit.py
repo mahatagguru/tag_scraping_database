@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 
 # Import models after ensuring they're available
 try:
-    from db import get_db_session
+    from db import get_db_session_context
     from models import AuditLog
     MODELS_AVAILABLE = True
 except ImportError:
@@ -97,18 +97,7 @@ class AuditLogger:
             pass
         return 'unknown'
     
-    def _get_db_session(self) -> Optional[Session]:
-        """Get a database session for audit logging."""
-        if not MODELS_AVAILABLE:
-            return None
-        
-        try:
-            if not self.session or self.session.is_closed:
-                self.session = get_db_session()
-            return self.session
-        except Exception as e:
-            logger.error(f"Failed to get database session for audit logging: {e}")
-            return None
+
     
     def _log_to_database(self, level: str, message: str, **kwargs) -> bool:
         """Log audit entry to database."""
@@ -116,35 +105,30 @@ class AuditLogger:
             return False
         
         try:
-            session = self._get_db_session()
-            if not session:
-                return False
-            
-            # Create audit log entry
-            audit_entry = AuditLog(
-                level=level.upper(),
-                component=self.component,
-                operation=kwargs.get('operation'),
-                status=kwargs.get('status'),
-                error_code=kwargs.get('error_code'),
-                error_message=kwargs.get('error_message'),
-                context=kwargs.get('context'),
-                message=message,
-                stack_trace=kwargs.get('stack_trace'),
-                user_agent=kwargs.get('user_agent'),
-                ip_address=kwargs.get('ip_address'),
-                execution_time_ms=kwargs.get('execution_time_ms'),
-                created_at=datetime.now(timezone.utc)
-            )
-            
-            session.add(audit_entry)
-            session.commit()
-            return True
+            with get_db_session_context() as session:
+                # Create audit log entry
+                audit_entry = AuditLog(
+                    level=level.upper(),
+                    component=self.component,
+                    operation=kwargs.get('operation'),
+                    status=kwargs.get('status'),
+                    error_code=kwargs.get('error_code'),
+                    error_message=kwargs.get('error_message'),
+                    context=kwargs.get('context'),
+                    message=message,
+                    stack_trace=kwargs.get('stack_trace'),
+                    user_agent=kwargs.get('user_agent'),
+                    ip_address=kwargs.get('ip_address'),
+                    execution_time_ms=kwargs.get('execution_time_ms'),
+                    created_at=datetime.now(timezone.utc)
+                )
+                
+                session.add(audit_entry)
+                session.commit()
+                return True
             
         except SQLAlchemyError as e:
             logger.error(f"Database error in audit logging: {e}")
-            if session:
-                session.rollback()
             return False
         except Exception as e:
             logger.error(f"Unexpected error in audit logging: {e}")

@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
@@ -56,3 +57,16 @@ def get_db_session():
         yield db
     finally:
         db.close()
+
+@contextmanager
+def get_db_session_context():
+    """Get a database session as a context manager."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def get_db_connection():
+    """Get a database connection (for backward compatibility)."""
+    return engine.connect()

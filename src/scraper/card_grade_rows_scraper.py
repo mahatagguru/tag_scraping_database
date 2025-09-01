@@ -47,7 +47,7 @@ def normalize_text(text):
 def parse_date_to_iso(date_text):
     """
     Attempt to parse date text to ISO format.
-    Returns (raw_text, iso_date) tuple.
+    Returns (raw_text, datetime_object) tuple.
     """
     if not date_text:
         return date_text, None
@@ -68,10 +68,10 @@ def parse_date_to_iso(date_text):
         match = re.match(pattern, raw_text)
         if match:
             try:
-                iso_date = formatter(match)
-                # Validate the date
-                datetime.fromisoformat(iso_date)
-                return raw_text, iso_date
+                iso_date_str = formatter(match)
+                # Validate the date and convert to datetime object
+                dt = datetime.fromisoformat(iso_date_str)
+                return raw_text, dt
             except ValueError:
                 continue
     
@@ -211,19 +211,19 @@ def extract_grade_rows_from_card_page(html, sport, year, set_title, card_name, c
                                 iso_timestamp = iso_timestamp[:-1]  # Remove Z suffix
                             dt = datetime.fromisoformat(iso_timestamp)
                             row_data['completed_date_raw'] = dt.strftime('%m-%d-%Y')
-                            row_data['completed_date_iso'] = dt.strftime('%Y-%m-%d')
+                            row_data['completed_date_iso'] = dt  # Store as datetime object, not string
                         except:
                             # Fallback to display text
                             date_text = normalize_text(cell.text())
-                            raw_date, iso_date = parse_date_to_iso(date_text)
+                            raw_date, dt = parse_date_to_iso(date_text)
                             row_data['completed_date_raw'] = raw_date
-                            row_data['completed_date_iso'] = iso_date
+                            row_data['completed_date_iso'] = dt  # Store as datetime object, not string
                     else:
                         # Use display text
                         date_text = normalize_text(cell.text())
-                        raw_date, iso_date = parse_date_to_iso(date_text)
+                        raw_date, dt = parse_date_to_iso(date_text)
                         row_data['completed_date_raw'] = raw_date
-                        row_data['completed_date_iso'] = iso_date
+                        row_data['completed_date_iso'] = dt  # Store as datetime object, not string
                 else:
                     # Regular text field - handle special cases
                     if field in ['chronology', 'chron_by_grade']:
