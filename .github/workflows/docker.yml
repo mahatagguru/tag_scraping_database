@@ -67,7 +67,7 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
         push: false
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:local
+        tags: tag-scraping-tool:local
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
@@ -108,7 +108,7 @@ jobs:
           docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest python -c "print('Docker image test successful')"
         else
           echo "Testing local image..."
-          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:local python -c "print('Docker image test successful')"
+          docker run --rm tag-scraping-tool:local python -c "print('Docker image test successful')"
         fi
         
     - name: Upload Docker image as artifact
