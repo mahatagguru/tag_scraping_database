@@ -3,10 +3,12 @@ FastMCP Client Example for TAG Grading Scraper
 Demonstrates how to connect to and use the FastMCP server
 """
 
-from fastmcp import FastMCPClient
 import asyncio
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
+from fastmcp import FastMCPClient
+
 
 async def main():
     """Main client example function"""

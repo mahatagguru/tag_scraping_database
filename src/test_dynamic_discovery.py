@@ -9,22 +9,23 @@ Tests:
 5. Report URL capture and storage
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import time
+
+from sqlalchemy.orm import Session
+
+from scraper.card_grade_rows_scraper import extract_grade_rows_from_url
+from scraper.cards_scraper import extract_cards_from_url
+from scraper.db_helpers import upsert_card_grade_row, upsert_cards_per_set, upsert_sets_per_year, upsert_years_index
+from scraper.enhanced_sets_scraper import extract_sets_from_url
 from scraper.pipeline import discover_categories
 from scraper.sport_years_scraper import extract_years_from_url
-from scraper.enhanced_sets_scraper import extract_sets_from_url
-from scraper.cards_scraper import extract_cards_from_url
-from scraper.card_grade_rows_scraper import extract_grade_rows_from_url
-from scraper.db_helpers import (
-    upsert_years_index, upsert_sets_per_year, 
-    upsert_cards_per_set, upsert_card_grade_row
-)
-from sqlalchemy.orm import Session
 from src.db import SessionLocal
-import time
+
 
 def test_dynamic_category_discovery():
     """Test 1: Dynamic category discovery"""

@@ -9,9 +9,10 @@ Scrapes sets tables from year pages like:
 Extracts set titles, URLs, and metrics while handling TOTALS rows separately.
 """
 
-import sys
 import re
+import sys
 from urllib.parse import urljoin
+
 from selectolax.parser import HTMLParser
 
 BASE_URL = "https://my.taggrading.com"

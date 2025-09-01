@@ -3,22 +3,32 @@
 Optimized scraping pipeline with increased parallelism and reduced delays.
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import datetime
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from db import SessionLocal
-from scraper.db_helpers import (
-    upsert_category, upsert_year, upsert_set,
-    upsert_category_total, upsert_year_total, upsert_set_total,
-    upsert_card, upsert_population_report
+from scraper.card_crawler import extract_card_urls, extract_cards, fetch_rendered_html as fetch_card_html
+from scraper.card_detail_crawler import (
+    extract_card_details,
+    extract_cert_urls,
+    fetch_rendered_html as fetch_card_detail_html,
 )
-from scraper.crawler import fetch_rendered_html as fetch_category_html, extract_categories, extract_category_urls
-from scraper.year_crawler import fetch_rendered_html as fetch_year_html, extract_years, extract_year_urls
-from scraper.set_crawler import fetch_rendered_html as fetch_set_html, extract_sets, extract_set_urls
-from scraper.card_crawler import fetch_rendered_html as fetch_card_html, extract_cards, extract_card_urls
-from scraper.card_detail_crawler import fetch_rendered_html as fetch_card_detail_html, extract_card_details, extract_cert_urls
+from scraper.crawler import extract_categories, extract_category_urls, fetch_rendered_html as fetch_category_html
+from scraper.db_helpers import (
+    upsert_card,
+    upsert_category,
+    upsert_category_total,
+    upsert_population_report,
+    upsert_set,
+    upsert_set_total,
+    upsert_year,
+    upsert_year_total,
+)
+from scraper.set_crawler import extract_set_urls, extract_sets, fetch_rendered_html as fetch_set_html
 from scraper.url_builder import build_set_page_url
-import datetime
+from scraper.year_crawler import extract_year_urls, extract_years, fetch_rendered_html as fetch_year_html
 
 CATEGORY_URL = "https://my.taggrading.com/pop-report"
 BASE_URL = "https://my.taggrading.com"

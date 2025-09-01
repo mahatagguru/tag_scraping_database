@@ -6,10 +6,11 @@ checking relationships, constraints, and identifying logical inconsistencies.
 """
 
 import logging
-from typing import List, Dict, Any, Tuple
-from sqlalchemy import text, inspect
-from sqlalchemy.orm import Session
+from typing import Any, Dict, List, Tuple
+
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from db import SessionLocal, engine
 from models import Base
@@ -19,6 +20,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 from contextlib import contextmanager
+
 
 @contextmanager
 def get_session():

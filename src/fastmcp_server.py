@@ -3,20 +3,21 @@ FastMCP Server for TAG Grading Scraper
 Exposes scraping tools and database operations through the Model Context Protocol
 """
 
-from fastmcp import FastMCP
-from typing import List, Dict, Optional, Any
 import asyncio
 from pathlib import Path
 import sys
+from typing import Any, Dict, List, Optional
+
+from fastmcp import FastMCP
 
 # Add the src directory to the path to import our modules
 sys.path.append(str(Path(__file__).parent))
 
-from models import *
-from scraper.unified_pipeline import UnifiedPipeline
-from scraper.multi_level_orchestrator import MultiLevelOrchestrator
-from scraper.db_helpers import DatabaseHelper
 from db import get_db_connection
+from models import *
+from scraper.db_helpers import DatabaseHelper
+from scraper.multi_level_orchestrator import MultiLevelOrchestrator
+from scraper.unified_pipeline import UnifiedPipeline
 
 # Initialize FastMCP server
 mcp = FastMCP("TAG Grading Scraper 🏷️")

@@ -1,5 +1,6 @@
 import sys
 from urllib.parse import urljoin
+
 from selectolax.parser import HTMLParser
 
 SET_URL = "https://my.taggrading.com/pop-report/Baseball/1989"

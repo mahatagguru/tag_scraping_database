@@ -6,8 +6,8 @@ This script tests whether the PostgreSQL enhancements are properly detected
 and applied in the models.
 """
 
-import sys
 import os
+import sys
 
 # Add the src directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +19,7 @@ def test_postgresql_detection():
     try:
         # Import the models to trigger the detection
         import models
-        
+
         # Check if PostgreSQL types are available
         print(f"PostgreSQL available: {models.POSTGRESQL_AVAILABLE}")
         print(f"JSON_TYPE: {models.JSON_TYPE}")
@@ -55,7 +55,7 @@ def test_import_compatibility():
     try:
         # Test PostgreSQL imports
         try:
-            from sqlalchemy.dialects.postgresql import JSONB, BIGSERIAL
+            from sqlalchemy.dialects.postgresql import BIGSERIAL, JSONB
             print("✅ PostgreSQL SQLAlchemy types available")
         except ImportError:
             print("⚠️  PostgreSQL SQLAlchemy types not available")
@@ -65,7 +65,7 @@ def test_import_compatibility():
         print("✅ Core SQLAlchemy types available")
         
         # Test our models
-        from models import Base, Category, Year, Set, Card, AuditLog
+        from models import AuditLog, Base, Card, Category, Set, Year
         print("✅ All model imports successful")
         
         return True

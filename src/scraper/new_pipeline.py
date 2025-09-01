@@ -15,17 +15,18 @@ Usage:
     python3 new_pipeline.py --sport Baseball --dry-run
 """
 
-import sys
 import argparse
 import datetime
-import time
-from urllib.parse import urljoin
 
 # Add project root to path
 import os
+import sys
+import time
+from urllib.parse import urljoin
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from scraper.multi_level_orchestrator import scrape_sport, scrape_multiple_sports
+from scraper.multi_level_orchestrator import scrape_multiple_sports, scrape_sport
 
 BASE_URL = "https://my.taggrading.com"
 

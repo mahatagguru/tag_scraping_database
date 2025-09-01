@@ -1,4 +1,5 @@
 import sys
+
 from selectolax.parser import HTMLParser
 
 CARD_DETAIL_URL = "https://my.taggrading.com/pop-report/Hockey/1989/O-Pee-Chee/Mario%20Lemieux/1"

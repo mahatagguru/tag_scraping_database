@@ -1,13 +1,26 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, ForeignKey, UniqueConstraint, Index, TIMESTAMP, JSON, BigInteger, func,
-    CheckConstraint, Boolean, SmallInteger
+    JSON,
+    TIMESTAMP,
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import relationship
+
 from db import Base
 
 # PostgreSQL-specific enhancements
 try:
-    from sqlalchemy.dialects.postgresql import JSONB, BIGSERIAL
+    from sqlalchemy.dialects.postgresql import BIGSERIAL, JSONB
     POSTGRESQL_AVAILABLE = True
 except ImportError:
     POSTGRESQL_AVAILABLE = False

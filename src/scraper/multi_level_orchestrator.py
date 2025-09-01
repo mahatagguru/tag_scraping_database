@@ -11,24 +11,30 @@ Coordinates the complete scraping flow:
 Supports parallel processing with configurable concurrency.
 """
 
-import sys
-import time
-import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from sqlalchemy.orm import Session
+import datetime
 
 # Add project root to path
 import os
+import sys
+import time
+
+from sqlalchemy.orm import Session
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import SessionLocal
-from scraper.sport_years_scraper import extract_years_from_url
-from scraper.enhanced_sets_scraper import extract_sets_from_url
-from scraper.cards_scraper import extract_cards_from_url
 from scraper.card_grade_rows_scraper import extract_grade_rows_from_url
+from scraper.cards_scraper import extract_cards_from_url
 from scraper.db_helpers import (
-    upsert_years_index, upsert_sets_per_year, upsert_totals_rollups, upsert_cards_per_set, upsert_card_grade_row
+    upsert_card_grade_row,
+    upsert_cards_per_set,
+    upsert_sets_per_year,
+    upsert_totals_rollups,
+    upsert_years_index,
 )
+from scraper.enhanced_sets_scraper import extract_sets_from_url
+from scraper.sport_years_scraper import extract_years_from_url
 
 
 class MultiLevelOrchestrator:

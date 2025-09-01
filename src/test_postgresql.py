@@ -6,10 +6,11 @@ This script tests the enhanced database schema with PostgreSQL-specific features
 to ensure compatibility and performance optimizations work correctly.
 """
 
+import logging
 import os
 import sys
-import logging
-from sqlalchemy import text, inspect
+
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 
 # Add the src directory to the path

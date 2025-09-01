@@ -1,5 +1,6 @@
 import sys
 from urllib.parse import urljoin
+
 from selectolax.parser import HTMLParser
 
 CARD_SET_URL = "https://my.taggrading.com/pop-report/Hockey/1989/O-Pee-Chee"

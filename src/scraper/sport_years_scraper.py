@@ -9,9 +9,10 @@ Scrapes the "Sets per Year" table from sport index pages like:
 Extracts year labels and URLs while handling TOTALS rows separately.
 """
 
-import sys
 import re
+import sys
 from urllib.parse import urljoin
+
 from selectolax.parser import HTMLParser
 
 BASE_URL = "https://my.taggrading.com"

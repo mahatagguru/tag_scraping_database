@@ -4,8 +4,9 @@ Run this script to create the basic database structure
 """
 
 import os
-import sqlite3
 from pathlib import Path
+import sqlite3
+
 
 def create_basic_tables():
     """Create basic database tables for the TAG Grading Scraper."""

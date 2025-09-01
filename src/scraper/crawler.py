@@ -2,8 +2,9 @@
 Main crawling logic for TAG Pop Report scraper.
 Traverses category, year, set, and card pages, extracts embedded JSON or HTML, and upserts data into the database.
 """
-import re
 import json
+import re
+
 import requests
 from selectolax.parser import HTMLParser
 

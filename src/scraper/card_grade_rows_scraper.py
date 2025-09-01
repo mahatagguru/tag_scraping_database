@@ -9,10 +9,11 @@ Extracts detailed grade information including rank, TAG grade, report URLs, date
 This implements the fifth level of the scraping pipeline: Sport → Year → Set → Card → Grade Rows.
 """
 
-import sys
-import re
 from datetime import datetime
+import re
+import sys
 from urllib.parse import urljoin
+
 from selectolax.parser import HTMLParser
 
 BASE_URL = "https://my.taggrading.com"

@@ -3,8 +3,9 @@ FastMCP Server Configuration for TAG Grading Scraper
 """
 
 import os
-from typing import Dict, Any
 from pathlib import Path
+from typing import Any, Dict
+
 
 class FastMCPConfig:
     """Configuration class for FastMCP server settings"""

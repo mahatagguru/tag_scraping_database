@@ -6,9 +6,9 @@ Using the official MCP Python SDK instead of FastMCP
 import asyncio
 import json
 import logging
-from typing import Any, Dict, List, Optional
 from pathlib import Path
 import sys
+from typing import Any, Dict, List, Optional
 
 # Add the src directory to the path to import our modules
 sys.path.append(str(Path(__file__).parent))
@@ -18,33 +18,33 @@ try:
     from mcp.types import (
         CallToolRequest,
         CallToolResult,
-        ListToolsRequest,
-        ListToolsResult,
-        Tool,
-        TextContent,
-        ImageContent,
+        DataType,
         EmbeddedResource,
-        Resource,
-        ListResourcesRequest,
-        ListResourcesResult,
-        ReadResourceRequest,
-        ReadResourceResult,
         GetSchemasRequest,
         GetSchemasResult,
-        Schema,
+        ImageContent,
+        ListResourcesRequest,
+        ListResourcesResult,
+        ListToolsRequest,
+        ListToolsResult,
         Property,
-        DataType,
+        ReadResourceRequest,
+        ReadResourceResult,
+        Resource,
+        Schema,
+        TextContent,
+        Tool,
     )
 except ImportError:
     print("❌ MCP SDK not found. Install with: pip install mcp")
     print("   Or install FastMCP from GitHub: pip install git+https://github.com/jlowin/fastmcp.git")
     sys.exit(1)
 
-from models import *
-from scraper.unified_pipeline import UnifiedPipeline
-from scraper.multi_level_orchestrator import MultiLevelOrchestrator
-from scraper.db_helpers import DatabaseHelper
 from db import get_db_connection
+from models import *
+from scraper.db_helpers import DatabaseHelper
+from scraper.multi_level_orchestrator import MultiLevelOrchestrator
+from scraper.unified_pipeline import UnifiedPipeline
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

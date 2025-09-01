@@ -10,9 +10,10 @@ Extracts card names, URLs, and metrics while handling TOTALS rows separately.
 This implements the third level of the scraping pipeline: Sport → Year → Set → Cards.
 """
 
-import sys
 import re
+import sys
 from urllib.parse import urljoin
+
 from selectolax.parser import HTMLParser
 
 BASE_URL = "https://my.taggrading.com"

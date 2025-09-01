@@ -20,29 +20,33 @@ Usage:
     python -m scraper.pipeline --categories Baseball --start-from set --year-filter 1989 --dry-run
 """
 
-import os
-import sys
-import time
-import logging
 import argparse
 import asyncio
-import random
-from typing import List, Optional, Literal, Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging
+import os
+import random
+import sys
+import time
+from typing import Any, Dict, List, Literal, Optional
+
 from sqlalchemy.orm import Session
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import SessionLocal
-from scraper.sport_years_scraper import extract_years_from_url
-from scraper.enhanced_sets_scraper import extract_sets_from_url  
-from scraper.cards_scraper import extract_cards_from_url
 from scraper.card_grade_rows_scraper import extract_grade_rows_from_url
+from scraper.cards_scraper import extract_cards_from_url
 from scraper.db_helpers import (
-    upsert_years_index, upsert_sets_per_year, upsert_totals_rollups, 
-    upsert_cards_per_set, upsert_card_grade_row
+    upsert_card_grade_row,
+    upsert_cards_per_set,
+    upsert_sets_per_year,
+    upsert_totals_rollups,
+    upsert_years_index,
 )
+from scraper.enhanced_sets_scraper import extract_sets_from_url
+from scraper.sport_years_scraper import extract_years_from_url
 
 # Configuration
 BASE_URL = "https://my.taggrading.com"
@@ -158,8 +162,9 @@ def discover_categories() -> List[str]:
         List of category names
     """
     try:
-        from scraper.sport_years_scraper import fetch_rendered_html
         from selectolax.parser import HTMLParser
+
+        from scraper.sport_years_scraper import fetch_rendered_html
         
         html = fetch_rendered_html(f"{BASE_URL}/pop-report")
         tree = HTMLParser(html)

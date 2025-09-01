@@ -10,32 +10,35 @@ Consolidates all scraping functionality into a single, optimized pipeline with:
 - Graceful failure handling
 """
 
+import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import datetime, timezone
+import logging
 import os
 import sys
-import time
-import logging
-import argparse
-import traceback
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
-from contextlib import contextmanager
+import time
+import traceback
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add src to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
-from src.db import SessionLocal
-from src.models import AuditLog
+
+from scraper.db_helpers import (
+    upsert_card_grade_row,
+    upsert_cards_per_set,
+    upsert_sets_per_year,
+    upsert_totals_rollups,
+    upsert_years_index,
+)
 from scraper.multi_level_orchestrator import MultiLevelOrchestrator
 from scraper.pipeline import discover_categories
-from scraper.db_helpers import (
-    upsert_years_index, upsert_sets_per_year, 
-    upsert_cards_per_set, upsert_card_grade_row,
-    upsert_totals_rollups
-)
+from src.db import SessionLocal
+from src.models import AuditLog
 
 # Configuration
 BASE_URL = "https://my.taggrading.com"

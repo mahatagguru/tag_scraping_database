@@ -1,6 +1,23 @@
 import datetime
-from models import Category, Year, Set, CategoryTotal, YearTotal, SetTotal, Card, PopulationReport, YearsIndex, SetsPerYear, TotalsRollups, CardsPerSet, CardGradeRows
+
 from sqlalchemy.orm import Session
+
+from models import (
+    Card,
+    CardGradeRows,
+    CardsPerSet,
+    Category,
+    CategoryTotal,
+    PopulationReport,
+    Set,
+    SetsPerYear,
+    SetTotal,
+    TotalsRollups,
+    Year,
+    YearsIndex,
+    YearTotal,
+)
+
 
 def upsert_category(session: Session, name: str, img: str = None):
     """

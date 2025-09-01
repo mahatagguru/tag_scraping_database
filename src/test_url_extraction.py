@@ -4,13 +4,15 @@ Test script to verify URL extraction from table rows.
 Tests the updated crawlers to ensure they extract URLs from the first cell of each row.
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from scraper.set_crawler import fetch_rendered_html, extract_sets
-from scraper.year_crawler import extract_years
 from scraper.card_crawler import extract_cards
+from scraper.set_crawler import extract_sets, fetch_rendered_html
+from scraper.year_crawler import extract_years
+
 
 def test_set_url_extraction():
     """Test URL extraction from set table rows."""

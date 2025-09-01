@@ -4,13 +4,16 @@ Simple test script to debug card URL extraction from set pages.
 This bypasses the full pipeline and focuses just on the extraction logic.
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from scraper.set_crawler import fetch_rendered_html
-from scraper.card_crawler import extract_card_urls
 from selectolax.parser import HTMLParser
+
+from scraper.card_crawler import extract_card_urls
+from scraper.set_crawler import fetch_rendered_html
+
 
 def test_card_extraction():
     """Test card URL extraction from a specific set page."""

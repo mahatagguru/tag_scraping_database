@@ -11,15 +11,15 @@ Tests the complete scraping flow:
 This test verifies that all four levels work together correctly.
 """
 
-import sys
 import os
+import sys
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from scraper.sport_years_scraper import extract_years_from_url
-from scraper.enhanced_sets_scraper import extract_sets_from_url
 from scraper.cards_scraper import extract_cards_from_url
+from scraper.enhanced_sets_scraper import extract_sets_from_url
+from scraper.sport_years_scraper import extract_years_from_url
 
 
 def test_sport_to_years():

@@ -9,12 +9,12 @@ Tests:
 5. Dynamic discovery capabilities
 """
 
-import sys
-import os
-import time
-import subprocess
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
+import time
 
 # Add src to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -208,7 +208,7 @@ def test_audit_logging():
     
     try:
         # Test if audit logging classes can be imported
-        from scraper.unified_pipeline import AuditLogger, UnifiedPipeline, PipelineConfig
+        from scraper.unified_pipeline import AuditLogger, PipelineConfig, UnifiedPipeline
         
         print("✅ Audit logging classes imported successfully")
         

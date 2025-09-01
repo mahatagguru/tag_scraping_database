@@ -5,14 +5,14 @@ Comprehensive Test Suite for Multi-Level Scraping System
 Tests the complete scraping system without requiring database connection.
 """
 
-import sys
 import os
+import sys
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from scraper.sport_years_scraper import extract_years_from_url
 from scraper.enhanced_sets_scraper import extract_sets_from_url
+from scraper.sport_years_scraper import extract_years_from_url
 
 
 def test_sport_years_extraction():

@@ -5,25 +5,25 @@ This module provides structured logging with error handling, context tracking,
 performance monitoring, and database persistence for audit logs.
 """
 
-import json
-import traceback
-import time
-import logging
-from datetime import datetime, timezone
-from typing import Optional, Dict, Any, Union
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from functools import wraps
 import inspect
+import json
+import logging
 import os
 import sys
+import time
+import traceback
+from typing import Any, Dict, Optional, Union
 
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 # Import models after ensuring they're available
 try:
-    from models import AuditLog
     from db import get_db_session
+    from models import AuditLog
     MODELS_AVAILABLE = True
 except ImportError:
     MODELS_AVAILABLE = False
@@ -432,4 +432,5 @@ def cleanup_audit_logging():
 
 # Register cleanup on module unload
 import atexit
+
 atexit.register(cleanup_audit_logging)

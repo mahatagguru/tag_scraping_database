@@ -2,10 +2,12 @@ import datetime
 import logging
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from sqlalchemy import text
-from db import engine, Base  # ensures engine and Base are loaded  # noqa: E402
+
+from db import Base, engine  # ensures engine and Base are loaded  # noqa: E402
 import models  # ensures all models are registered  # noqa: F401, E402
 
 # Check if PostgreSQL is available
