@@ -35,6 +35,13 @@ prometheus-client>=0.17.0,<1.0.0
 httpx>=0.24.0,<1.0.0
 requests>=2.31.0,<3.0.0
 
+# Web scraping dependencies
+playwright>=1.40.0,<2.0.0
+selectolax>=0.3.0,<1.0.0
+
+# System utilities
+psutil>=5.9.0,<6.0.0
+
 # Data processing
 pandas>=2.0.0,<3.0.0
 numpy>=1.24.0,<2.0.0
