@@ -1,0 +1,49 @@
+[flake8]
+# Maximum line length
+max-line-length = 120
+
+# Ignore specific error codes that are less critical
+ignore = 
+    # E501: line too long (we'll use 120 chars instead of 88)
+    # W293: blank line contains whitespace (common in generated code)
+    # W291: trailing whitespace (common in generated code)
+    # E128: continuation line under-indented for visual indent
+    # E129: visually indented line with same indent as next logical line
+    W293,
+    W291,
+    E128,
+    E129
+
+# Exclude certain directories and files
+exclude = 
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .venv,
+    venv,
+    env,
+    .env,
+    *.pyc,
+    .coverage,
+    htmlcov,
+    .tox,
+    dist,
+    build,
+    *.egg-info,
+    logs,
+    data
+
+# Per-file ignores
+per-file-ignores =
+    # Test files can have longer lines and more relaxed rules
+    test_*.py:E501,W293,W291,E128,E129
+    # Generated files
+    *_generated.py:E501,W293,W291,E128,E129
+    # Migration files
+    migrations/*.py:E501,W293,W291,E128,E129
+
+# Maximum complexity
+max-complexity = 15
+
+# Maximum doc line length
+max-doc-length = 120

@@ -1,15 +1,16 @@
-from dotenv import load_dotenv
-load_dotenv()
-
-from db import engine, Base  # ensures engine and Base are loaded
-import models  # ensures all models are registered
-from sqlalchemy import text
 import datetime
 import logging
 
+from dotenv import load_dotenv
+load_dotenv()
+
+from sqlalchemy import text
+from db import engine, Base  # ensures engine and Base are loaded  # noqa: E402
+import models  # ensures all models are registered  # noqa: F401, E402
+
 # Check if PostgreSQL is available
 try:
-    from sqlalchemy.dialects.postgresql import JSONB
+    from sqlalchemy.dialects.postgresql import JSONB  # noqa: F401
     POSTGRESQL_AVAILABLE = True
 except ImportError:
     POSTGRESQL_AVAILABLE = False
@@ -17,6 +18,7 @@ except ImportError:
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 def migrate_add_card_fields():
     """Add new card fields if they don't exist."""
@@ -61,7 +63,10 @@ def migrate_add_updated_at():
                         conn.execute(text(f"ALTER TABLE {table} ADD COLUMN updated_at TEXT DEFAULT (datetime('now'));"))
                 else:
                     # For PostgreSQL, use IF NOT EXISTS
-                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"))
+                    conn.execute(text(
+                        f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS "
+                        f"updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"
+                    ))
             
             conn.commit()
             logger.info("Successfully added updated_at columns")
@@ -135,7 +140,8 @@ def migrate_create_population_report_partitions(months_ahead=12):
             
             now = datetime.datetime.now(datetime.timezone.utc)
             for i in range(months_ahead):
-                first_of_month = (now.replace(day=1, hour=0, minute=0, microsecond=0) + datetime.timedelta(days=32*i)).replace(day=1)
+                first_of_month = (now.replace(day=1, hour=0, minute=0, microsecond=0) + 
+                                 datetime.timedelta(days=32 * i)).replace(day=1)
                 next_month = (first_of_month + datetime.timedelta(days=32)).replace(day=1)
                 partition_name = f"population_reports_{first_of_month.strftime('%Y_%m')}"
                 
