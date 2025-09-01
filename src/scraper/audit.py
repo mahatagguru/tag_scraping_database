@@ -30,14 +30,42 @@ except ImportError:
     print("Warning: Database models not available, audit logging will be file-based only")
 
 # Configure standard logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/audit.log'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+def setup_logging():
+    """Setup logging with proper directory handling."""
+    # Ensure logs directory exists
+    logs_dir = 'logs'
+    if not os.path.exists(logs_dir):
+        try:
+            os.makedirs(logs_dir, exist_ok=True)
+        except (OSError, PermissionError):
+            # If we can't create logs directory, just use console logging
+            logging.basicConfig(
+                level=logging.INFO,
+                format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                handlers=[logging.StreamHandler(sys.stdout)]
+            )
+            return
+    
+    # Try to setup file logging
+    try:
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(os.path.join(logs_dir, 'audit.log')),
+                logging.StreamHandler(sys.stdout)
+            ]
+        )
+    except (OSError, PermissionError):
+        # Fallback to console-only logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[logging.StreamHandler(sys.stdout)]
+        )
+
+# Setup logging
+setup_logging()
 
 logger = logging.getLogger(__name__)
 

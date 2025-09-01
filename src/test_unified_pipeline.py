@@ -44,6 +44,7 @@ def test_unified_pipeline_basic():
             capture_output=True,
             text=True,
             cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
         
         if result.returncode == 0:
             print("✅ Basic pipeline test passed")
@@ -82,6 +83,7 @@ def test_unified_pipeline_discovery():
             capture_output=True,
             text=True,
             cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
         
         if result.returncode == 0:
             # Check if discovery worked
@@ -125,6 +127,7 @@ def test_unified_pipeline_error_handling():
             capture_output=True,
             text=True,
             cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
         
         # Should handle errors gracefully
         if "error" in result.stdout.lower() or "invalid" in result.stdout.lower():
@@ -167,6 +170,7 @@ def test_multi_runner_orchestrator():
             stderr=subprocess.PIPE,
             text=True,
             cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
         
         # Give it a few seconds to start up
         time.sleep(5)
