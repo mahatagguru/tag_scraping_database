@@ -45,6 +45,7 @@ class Year(Base):
     
     # Constraints
     __table_args__ = (
+        
         UniqueConstraint('category_id', 'year', name='uq_category_year'),
         CheckConstraint('year >= 1800 AND year <= 2100', name='chk_year_range'),
         Index('ix_years_category_year', 'category_id', 'year'),

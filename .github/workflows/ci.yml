@@ -38,13 +38,13 @@ jobs:
       run: |
         case "${{ matrix.tool }}" in
           "black")
-            black --check --diff src/ tests/ --line-length 88
+            black --check --diff src/ --line-length 88
             ;;
           "isort")
-            isort --check-only --diff src/ tests/
+            isort --check-only --diff src/
             ;;
           "flake8")
-            flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+            flake8 src/ --max-line-length=88 --extend-ignore=E203,W503
             ;;
           "mypy")
             mypy src/ --ignore-missing-imports --no-strict-optional
@@ -87,7 +87,7 @@ jobs:
     - name: Run tests with SQLite
       run: |
         cd src
-        python -m pytest tests/ -v --cov=. --cov-report=xml --cov-report=html
+        python -m pytest . -v --cov=. --cov-report=xml --cov-report=html
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -154,7 +154,7 @@ jobs:
     - name: Run tests with PostgreSQL
       run: |
         cd src
-        python -m pytest tests/ -v --cov=. --cov-report=xml --cov-report=html
+        python -m pytest . -v --cov=. --cov-report=xml --cov-report=html
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
