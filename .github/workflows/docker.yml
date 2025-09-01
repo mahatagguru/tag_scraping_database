@@ -49,17 +49,6 @@ jobs:
         echo "Please set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets to enable Docker Hub integration."
         echo "See DOCKER_HUB_SETUP.md for setup instructions."
         
-    - name: Build Docker image only (no push)
-      if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'false'
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        platforms: linux/amd64,linux/arm64
-        push: false
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:local
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
@@ -71,12 +60,36 @@ jobs:
           type=semver,pattern={{version}}
           type=sha,prefix={{branch}}-
           
-    - name: Build and push Docker image
+    - name: Build Docker image (no push)
+      if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'false'
       uses: docker/build-push-action@v6
       with:
         context: .
         platforms: linux/amd64,linux/arm64
-        push: ${{ github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true' }}
+        push: false
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:local
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Docker image
+      if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true'
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build Docker image (PR only)
+      if: github.event_name == 'pull_request'
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: false
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
@@ -84,8 +97,19 @@ jobs:
         
     - name: Test Docker image
       run: |
-        # Test the built image
-        docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest python -c "print('Docker image test successful')"
+        # Test the built image based on the scenario
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          echo "Testing PR image..."
+          # For PRs, use the first tag from metadata (usually branch name)
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          docker run --rm $IMAGE_TAG python -c "print('Docker image test successful')"
+        elif [ "${{ steps.check-credentials.outputs.has_credentials }}" == "true" ]; then
+          echo "Testing pushed image..."
+          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest python -c "print('Docker image test successful')"
+        else
+          echo "Testing local image..."
+          docker run --rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:local python -c "print('Docker image test successful')"
+        fi
         
     - name: Upload Docker image as artifact
       if: github.event_name == 'pull_request'
