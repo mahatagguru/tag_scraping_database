@@ -89,7 +89,7 @@ class PipelineStats:
     def get_duration(self) -> float:
         return time.time() - self.start_time
     
-    def print_summary(self):
+    def print_summary(self) -> None:
         duration = self.get_duration()
         logger.info("=" * 80)
         logger.info("UNIFIED PIPELINE EXECUTION SUMMARY")
@@ -114,7 +114,7 @@ class AuditLogger:
         self.session = session
         self.runner_id = runner_id or f"runner_{threading.get_ident()}"
     
-    def log_operation(self, level: str, message: str, context: Optional[Dict] = None):
+    def log_operation(self, level: str, message: str, context: Optional[Dict] = None) -> None:
         """Log an operation to the audit log table"""
         try:
             audit_entry = AuditLog(
@@ -131,7 +131,7 @@ class AuditLogger:
         except Exception as e:
             logger.error(f"Failed to log to audit table: {e}")
     
-    def log_discovery(self, entity_type: str, count: int, details: Dict):
+    def log_discovery(self, entity_type: str, count: int, details: Dict) -> None:
         """Log discovery operations"""
         self.log_operation(
             level="INFO",
@@ -144,7 +144,7 @@ class AuditLogger:
             }
         )
     
-    def log_error(self, operation: str, error: str, context: Optional[Dict] = None):
+    def log_error(self, operation: str, error: str, context: Optional[Dict] = None) -> None:
         """Log error operations"""
         self.log_operation(
             level="ERROR",
@@ -156,7 +156,7 @@ class AuditLogger:
             }
         )
     
-    def log_success(self, operation: str, details: Dict):
+    def log_success(self, operation: str, details: Dict) -> None:
         """Log successful operations"""
         self.log_operation(
             level="INFO",
@@ -183,9 +183,9 @@ class UnifiedPipeline:
         logger.info(f"Unified pipeline initialized: {config}")
     
     @contextmanager
-    def get_session(self):
+    def get_session(self) -> Any:
         """Context manager for database sessions"""
-        if self.dry_run:
+        if self.config.dry_run:
             yield None
         else:
             session = SessionLocal()
@@ -199,7 +199,7 @@ class UnifiedPipeline:
                     self.session = None
                     self.audit_logger = None
     
-    def retry_with_backoff(self, func, *args, **kwargs):
+    def retry_with_backoff(self, func: Any, *args: Any, **kwargs: Any) -> Any:
         """Retry function with exponential backoff and jitter"""
         for attempt in range(self.config.max_retries + 1):
             try:
@@ -231,7 +231,7 @@ class UnifiedPipeline:
                 time.sleep(sleep_time)
                 self.stats.retries_performed += 1
     
-    def discover_and_scrape_categories(self) -> List[str]:
+    def discover_and_scrape_categories(self) -> Any:
         """Discover all available categories and scrape them"""
         logger.info("🔍 Starting category discovery...")
         
@@ -252,7 +252,7 @@ class UnifiedPipeline:
                 self.audit_logger.log_error("category_discovery", str(e))
             raise
     
-    def scrape_sport_complete(self, sport_url: str) -> Dict[str, Any]:
+    def scrape_sport_complete(self, sport_url: str) -> Any:
         """Scrape a complete sport using the multi-level orchestrator"""
         sport_name = sport_url.split('/')[-1]
         logger.info(f"🚀 Starting complete scrape for {sport_name}")
@@ -414,7 +414,7 @@ class UnifiedPipeline:
                 'runner_id': self.config.runner_id
             }
 
-def main():
+def main() -> int:
     """Main entry point for the unified pipeline"""
     parser = argparse.ArgumentParser(
         description='Unified TAG Grading Scraper Pipeline - Single command for complete scraping'

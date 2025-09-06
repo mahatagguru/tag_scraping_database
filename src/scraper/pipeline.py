@@ -23,6 +23,7 @@ Usage:
 import argparse
 import asyncio
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, List, Optional
 import logging
 import os
 import random
@@ -78,7 +79,7 @@ logger = logging.getLogger(__name__)
 class PipelineStats:
     """Track pipeline statistics and outcomes"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.pages_scraped = 0
         self.rows_inserted = 0
         self.rows_updated = 0
@@ -137,7 +138,7 @@ class PipelineStats:
         logger.info("=" * 80)
 
 
-def retry_with_backoff(func, max_retries=MAX_RETRIES, backoff_base=RETRY_BACKOFF_BASE, jitter_max=RETRY_JITTER_MAX):
+def retry_with_backoff(func: Any, max_retries: int = MAX_RETRIES, backoff_base: float = RETRY_BACKOFF_BASE, jitter_max: float = RETRY_JITTER_MAX) -> Any:
     """
     Retry function with exponential backoff and jitter
     
@@ -407,7 +408,7 @@ class FiveTierPipeline:
             raise
 
 
-def main():
+def main() -> None:
     """CLI entry point - Defaults to discovering and scraping ALL available categories"""
     parser = argparse.ArgumentParser(
         description='Five-Tier TAG Grading Scraping Pipeline'
