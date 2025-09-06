@@ -3,8 +3,8 @@ import os
 from typing import Generator, Iterator
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Engine, text
-from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from sqlalchemy import Engine, create_engine, text
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 # Always load .env from the project root
 project_root = os.path.dirname(os.path.dirname(__file__))
