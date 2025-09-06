@@ -12,6 +12,7 @@ This implements the third level of the scraping pipeline: Sport → Year → Set
 
 import re
 import sys
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin
 
 from selectolax.parser import HTMLParser
@@ -19,7 +20,7 @@ from selectolax.parser import HTMLParser
 BASE_URL = "https://my.taggrading.com"
 
 
-def fetch_rendered_html(url):
+def fetch_rendered_html(url: str) -> str:
     """Fetch rendered HTML using Playwright for dynamic content"""
     try:
         from playwright.sync_api import sync_playwright
@@ -32,21 +33,21 @@ def fetch_rendered_html(url):
         page = browser.new_page()
         page.goto(url, timeout=60000)
         page.wait_for_load_state("networkidle")
-        html = page.content()
+        html: str = page.content()
         browser.close()
         return html
 
 
-def normalize_text(text):
+def normalize_text(text: Optional[str]) -> str:
     """Normalize text by trimming and collapsing whitespace"""
     if not text:
         return ""
     return re.sub(r'\s+', ' ', text.strip())
 
 
-def extract_metrics_from_row(row):
+def extract_metrics_from_row(row: Any) -> Dict[str, Any]:
     """Extract numeric metrics from table row cells (excluding first two cells: card number and player name)"""
-    metrics = {}
+    metrics: Dict[str, Any] = {}
     cells = row.css('td.MuiTableCell-root')
     
     if len(cells) < 3:  # Need at least card number, player name, and one metric cell
@@ -99,13 +100,13 @@ def extract_metrics_from_row(row):
     return metrics
 
 
-def extract_card_urls_from_cell(title_cell):
+def extract_card_urls_from_cell(title_cell: Any) -> List[str]:
     """Extract all URLs from the title cell"""
-    card_urls = []
+    card_urls: List[str] = []
     anchors = title_cell.css('a[href]')
     
     for anchor in anchors:
-        href = anchor.attributes.get('href', '')
+        href = anchor.attributes.get('href', '') if anchor.attributes else ''
         # Filter out non-destinations: href that are empty, #, javascript:*
         if href and not href.startswith('#') and not href.startswith('javascript:'):
             # Convert to absolute URL
@@ -123,7 +124,7 @@ def extract_card_urls_from_cell(title_cell):
     return unique_urls
 
 
-def extract_cards_from_set_page(html, sport, year, set_title, set_url):
+def extract_cards_from_set_page(html: str, sport: str, year: str, set_title: str, set_url: str) -> Dict[str, Any]:
     """
     Extract cards from set page HTML.
     
@@ -221,7 +222,7 @@ def extract_cards_from_set_page(html, sport, year, set_title, set_url):
     }
 
 
-def extract_cards_from_url(set_url, set_title=None):
+def extract_cards_from_url(set_url: str, set_title: Optional[str] = None) -> Dict[str, Any]:
     """
     Extract cards from a set URL.
     
@@ -253,7 +254,7 @@ def extract_cards_from_url(set_url, set_title=None):
     return extract_cards_from_set_page(html, sport, year, set_title, set_url)
 
 
-def main():
+def main() -> None:
     """Test the cards scraper"""
     # Test URLs
     test_urls = [
