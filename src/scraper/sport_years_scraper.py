@@ -11,6 +11,7 @@ Extracts year labels and URLs while handling TOTALS rows separately.
 
 import re
 import sys
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin
 
 from selectolax.parser import HTMLParser
@@ -18,7 +19,7 @@ from selectolax.parser import HTMLParser
 BASE_URL = "https://my.taggrading.com"
 
 
-def fetch_rendered_html(url):
+def fetch_rendered_html(url: str) -> str:
     """Fetch rendered HTML using Playwright for dynamic content"""
     try:
         from playwright.sync_api import sync_playwright
@@ -36,16 +37,16 @@ def fetch_rendered_html(url):
         return html
 
 
-def normalize_text(text):
+def normalize_text(text: Optional[str]) -> str:
     """Normalize text by trimming and collapsing whitespace"""
     if not text:
         return ""
     return re.sub(r'\s+', ' ', text.strip())
 
 
-def extract_metrics_from_row(row):
+def extract_metrics_from_row(row: Any) -> Dict[str, Any]:
     """Extract numeric metrics from table row cells (excluding first cell)"""
-    metrics = {}
+    metrics: Dict[str, Any] = {}
     cells = row.css('td.MuiTableCell-root')
     
     if len(cells) < 2:
@@ -79,7 +80,7 @@ def extract_metrics_from_row(row):
     return metrics
 
 
-def extract_years_index(html, sport):
+def extract_years_index(html: str, sport: str) -> Dict[str, Any]:
     """
     Extract years index from sport page HTML.
     
@@ -173,7 +174,7 @@ def extract_years_index(html, sport):
     }
 
 
-def extract_years_from_url(url):
+def extract_years_from_url(url: str) -> Dict[str, Any]:
     """
     Extract years index from a sport URL.
     
@@ -192,7 +193,7 @@ def extract_years_from_url(url):
     return extract_years_index(html, sport)
 
 
-def main():
+def main() -> None:
     """Test the years index scraper"""
     # Test URLs
     test_urls = [

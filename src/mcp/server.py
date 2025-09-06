@@ -5,7 +5,7 @@ Exposes scraping tools and database operations through the Model Context Protoco
 
 from pathlib import Path
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from fastmcp import FastMCP
 
@@ -21,11 +21,18 @@ from scraper.unified_pipeline import UnifiedPipeline
 # Initialize FastMCP server
 mcp = FastMCP("TAG Grading Scraper 🏷️")
 
+# Type variable for decorator
+F = TypeVar('F', bound=Callable[..., Any])
+
 # Initialize database helper
 db_helper = DatabaseHelper()
 
+# Typed decorator
+def tool(func: F) -> F:
+    return mcp.tool(func)
 
-@mcp.tool
+
+@tool
 def scrape_sport_years(sport: str) -> Dict[str, Any]:
     """
     Scrape available years for a specific sport
@@ -55,7 +62,7 @@ def scrape_sport_years(sport: str) -> Dict[str, Any]:
         }
 
 
-@mcp.tool
+@tool
 def scrape_sets_for_year(sport: str, year: str) -> Dict[str, Any]:
     """
     Scrape available sets for a specific sport and year
@@ -88,7 +95,7 @@ def scrape_sets_for_year(sport: str, year: str) -> Dict[str, Any]:
         }
 
 
-@mcp.tool
+@tool
 def scrape_cards_for_set(set_name: str, limit: Optional[int] = 100) -> Dict[str, Any]:
     """
     Scrape cards for a specific set
@@ -119,7 +126,7 @@ def scrape_cards_for_set(set_name: str, limit: Optional[int] = 100) -> Dict[str,
         }
 
 
-@mcp.tool
+@tool
 def get_database_stats() -> Dict[str, Any]:
     """
     Get statistics about the scraped data in the database
@@ -142,7 +149,7 @@ def get_database_stats() -> Dict[str, Any]:
         }
 
 
-@mcp.tool
+@tool
 def search_cards(query: str, limit: Optional[int] = 50) -> Dict[str, Any]:
     """
     Search for cards in the database
@@ -172,7 +179,7 @@ def search_cards(query: str, limit: Optional[int] = 50) -> Dict[str, Any]:
         }
 
 
-@mcp.tool
+@tool
 def run_full_pipeline(sport: str, year: str, set_name: Optional[str] = None) -> Dict[str, Any]:
     """
     Run the full scraping pipeline for a sport, year, and optionally a specific set
@@ -207,7 +214,7 @@ def run_full_pipeline(sport: str, year: str, set_name: Optional[str] = None) -> 
         }
 
 
-@mcp.tool
+@tool
 def get_available_sports() -> Dict[str, Any]:
     """
     Get list of available sports that can be scraped
@@ -232,7 +239,7 @@ def get_available_sports() -> Dict[str, Any]:
         }
 
 
-@mcp.tool
+@tool
 def get_pipeline_status() -> Dict[str, Any]:
     """
     Get the current status of the scraping pipeline
@@ -262,7 +269,7 @@ def get_pipeline_status() -> Dict[str, Any]:
         }
 
 
-@mcp.tool
+@tool
 def get_card_totals_by_type(card_type: str = None, sport: str = None, year: str = None) -> Dict[str, Any]:
     """
     Get total counts of cards by type, sport, or year
@@ -316,7 +323,7 @@ def get_card_totals_by_type(card_type: str = None, sport: str = None, year: str 
         }
 
 
-@mcp.tool
+@tool
 def get_card_scores_analysis(min_score: float = None, max_score: float = None, sport: str = None) -> Dict[str, Any]:
     """
     Analyze card scores and grades
@@ -370,7 +377,7 @@ def get_card_scores_analysis(min_score: float = None, max_score: float = None, s
             "message": "Failed to retrieve score analysis"
         }
 
-@mcp.tool
+@tool
 def get_card_value_analysis(min_value: float = None, max_value: float = None, grade: str = None) -> Dict[str, Any]:
     """
     Analyze card values and market data
@@ -431,7 +438,7 @@ def get_card_value_analysis(min_value: float = None, max_value: float = None, gr
             "message": "Failed to retrieve value analysis"
         }
 
-@mcp.tool
+@tool
 def get_set_completion_status(set_name: str, sport: str = None, year: str = None) -> Dict[str, Any]:
     """
     Get completion status of card sets
@@ -482,7 +489,7 @@ def get_set_completion_status(set_name: str, sport: str = None, year: str = None
             "message": f"Failed to retrieve completion status for {set_name}"
         }
 
-@mcp.tool
+@tool
 def get_player_card_collection(player_name: str, sport: str = None, min_grade: float = None) -> Dict[str, Any]:
     """
     Get comprehensive collection data for a specific player
@@ -539,7 +546,7 @@ def get_player_card_collection(player_name: str, sport: str = None, min_grade: f
             "message": f"Failed to retrieve collection for {player_name}"
         }
 
-@mcp.tool
+@tool
 def get_market_trends_analysis(days: int = 30, sport: str = None, card_type: str = None) -> Dict[str, Any]:
     """
     Analyze market trends and price movements

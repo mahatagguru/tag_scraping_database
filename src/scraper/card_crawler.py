@@ -1,11 +1,12 @@
 import sys
+from typing import Any, Dict, List
 from urllib.parse import urljoin
 
 from selectolax.parser import HTMLParser
 
 CARD_SET_URL = "https://my.taggrading.com/pop-report/Hockey/1989/O-Pee-Chee"
 
-def fetch_rendered_html(url):
+def fetch_rendered_html(url: str) -> str:
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -16,13 +17,13 @@ def fetch_rendered_html(url):
         page = browser.new_page()
         page.goto(url, timeout=60000)
         page.wait_for_load_state("networkidle")
-        html = page.content()
+        html: str = page.content()
         browser.close()
         return html
 
-def extract_cards(html):
+def extract_cards(html: str) -> List[Dict[str, Any]]:
     tree = HTMLParser(html)
-    cards = []
+    cards: List[Dict[str, Any]] = []
     base_url = "https://my.taggrading.com"
     
     # Find the table body rows for cards
@@ -68,16 +69,16 @@ def extract_cards(html):
         })
     return cards
 
-def extract_card_urls(html):
+def extract_card_urls(html: str) -> List[str]:
     tree = HTMLParser(html)
-    urls = set()  # Use set to avoid duplicates
+    urls: set[str] = set()  # Use set to avoid duplicates
     
     for a in tree.css('a'):
-        href = a.attributes.get('href', '')
+        href = a.attributes.get('href', '') if a.attributes else ''
         
         # Look for card URLs that contain player names and card numbers
         # Pattern: /pop-report/Category/Year/Set/Player Name/CardNumber?setName=...
-        if (href.startswith('/pop-report/') and 
+        if (href and href.startswith('/pop-report/') and 
             href.count('/') >= 5 and  # At least 5 slashes for category/year/set/player/card
             '?' in href and  # Has query parameters
             'setName=' in href):  # Contains setName parameter
@@ -88,7 +89,7 @@ def extract_card_urls(html):
     
     return list(urls)  # Convert set back to list
 
-def fetch_and_print_cards(url):
+def fetch_and_print_cards(url: str) -> None:
     html = fetch_rendered_html(url)
     with open("debug_playwright_card_rendered.html", "w", encoding="utf-8") as f:
         f.write(html)

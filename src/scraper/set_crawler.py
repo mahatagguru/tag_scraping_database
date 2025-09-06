@@ -1,11 +1,12 @@
 import sys
+from typing import Any, Dict, List
 from urllib.parse import urljoin
 
 from selectolax.parser import HTMLParser
 
 SET_URL = "https://my.taggrading.com/pop-report/Baseball/1989"
 
-def fetch_rendered_html(url):
+def fetch_rendered_html(url: str) -> str:
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -16,13 +17,13 @@ def fetch_rendered_html(url):
         page = browser.new_page()
         page.goto(url, timeout=60000)
         page.wait_for_load_state("networkidle")
-        html = page.content()
+        html: str = page.content()
         browser.close()
         return html
 
-def extract_sets(html):
+def extract_sets(html: str) -> List[Dict[str, Any]]:
     tree = HTMLParser(html)
-    sets = []
+    sets: List[Dict[str, Any]] = []
     base_url = "https://my.taggrading.com"
     
     # Find the table body rows for sets
@@ -69,16 +70,16 @@ def extract_sets(html):
         })
     return sets
 
-def extract_set_urls(html):
+def extract_set_urls(html: str) -> List[str]:
     tree = HTMLParser(html)
-    urls = []
+    urls: List[str] = []
     for a in tree.css('a'):
-        href = a.attributes.get('href', '')
-        if href.startswith('/pop-report/') and href.count('/') == 4:
+        href = a.attributes.get('href', '') if a.attributes else ''
+        if href and href.startswith('/pop-report/') and href.count('/') == 4:
             urls.append('https://my.taggrading.com' + href)
     return urls
 
-def fetch_and_print_sets(url):
+def fetch_and_print_sets(url: str) -> None:
     html = fetch_rendered_html(url)
     with open("debug_playwright_set_rendered.html", "w", encoding="utf-8") as f:
         f.write(html)
