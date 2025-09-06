@@ -9,7 +9,7 @@ import json
 from fastmcp import FastMCPClient
 
 
-async def main():
+async def main() -> None:
     """Main client example function"""
     
     # Initialize FastMCP client
@@ -96,7 +96,7 @@ async def main():
         print("\n🔌 Connection closed")
 
 
-def run_sync_example():
+def run_sync_example() -> None:
     """Synchronous version of the client example"""
     
     # Initialize FastMCP client

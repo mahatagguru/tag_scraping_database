@@ -8,7 +8,7 @@ from pathlib import Path
 import sqlite3
 
 
-def create_basic_tables():
+def create_basic_tables() -> None:
     """Create basic database tables for the TAG Grading Scraper."""
     
     # Get the database path

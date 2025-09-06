@@ -17,6 +17,7 @@ Usage:
 
 import argparse
 import datetime
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
 import os
@@ -45,12 +46,12 @@ KNOWN_SPORTS = [
 ]
 
 
-def build_sport_url(sport):
+def build_sport_url(sport: str) -> str:
     """Build the sport index URL from sport name"""
     return urljoin(BASE_URL, f"/pop-report/{sport}")
 
 
-def scrape_single_sport(sport, concurrency=3, delay=1.0, dry_run=False):
+def scrape_single_sport(sport: str, concurrency: int = 3, delay: float = 1.0, dry_run: bool = False) -> Any:
     """
     Scrape a single sport completely.
     
@@ -106,7 +107,7 @@ def scrape_single_sport(sport, concurrency=3, delay=1.0, dry_run=False):
         }
 
 
-def scrape_all_sports(concurrency=3, delay=1.0, dry_run=False):
+def scrape_all_sports(concurrency: int = 3, delay: float = 1.0, dry_run: bool = False) -> Any:
     """
     Scrape all known sports.
     
@@ -151,7 +152,7 @@ def scrape_all_sports(concurrency=3, delay=1.0, dry_run=False):
     return summaries
 
 
-def print_final_summary(summaries):
+def print_final_summary(summaries: List[Dict[str, Any]]) -> None:
     """Print a comprehensive final summary"""
     print(f"\n{'='*80}")
     print("FINAL PIPELINE SUMMARY")
@@ -213,7 +214,7 @@ def print_final_summary(summaries):
         print("❌ MANY SPORTS FAILED - Check configuration and network")
 
 
-def main():
+def main() -> None:
     """Main pipeline entry point"""
     parser = argparse.ArgumentParser(
         description="Multi-Level Scraping Pipeline for TAG Grading Pop Reports",
@@ -258,7 +259,7 @@ Examples:
     
     try:
         if args.sport:
-            summaries = [scrape_single_sport(
+            summaries: List[Any] = [scrape_single_sport(
                 args.sport, 
                 concurrency=args.concurrency, 
                 delay=args.delay, 

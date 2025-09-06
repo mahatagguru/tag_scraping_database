@@ -6,7 +6,7 @@ checking relationships, constraints, and identifying logical inconsistencies.
 """
 
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
@@ -23,7 +23,7 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def get_session():
+def get_session() -> Any:
     """Get a database session context manager."""
     session = SessionLocal()
     try:
@@ -34,16 +34,16 @@ def get_session():
 class SchemaValidator:
     """Comprehensive database schema validator."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.inspector = inspect(engine)
-        self.validation_results = {
+        self.validation_results: Dict[str, List[Any]] = {
             'errors': [],
             'warnings': [],
             'info': [],
             'passed': []
         }
     
-    def _add_result(self, result_type: str, message: str, details: Dict[str, Any] = None):
+    def _add_result(self, result_type: str, message: str, details: Optional[Dict[str, Any]] = None) -> None:
         """Add a validation result."""
         result = {
             'message': message,
@@ -177,27 +177,26 @@ class SchemaValidator:
             table_indexes = self.inspector.get_indexes(table_name)
             
             for columns in expected_columns:
-                if isinstance(columns, str):
-                    columns = [columns]
+                column_list = [columns] if isinstance(columns, str) else columns
                 
                 # Check unique constraints
                 unique_exists = any(
-                    set(uq['column_names']) == set(columns)
+                    set(uq['column_names']) == set(column_list)
                     for uq in table_uniques
                 )
                 
                 # Check unique indexes as fallback
                 if not unique_exists:
                     unique_exists = any(
-                        idx['unique'] and set(idx['column_names']) == set(columns)
+                        idx['unique'] and set(idx['column_names']) == set(column_list)
                         for idx in table_indexes
                     )
                 
                 if not unique_exists:
-                    self._add_result('warnings', f"Missing unique constraint: {table_name}({', '.join(columns)})")
+                    self._add_result('warnings', f"Missing unique constraint: {table_name}({', '.join(column_list)})")
                     all_valid = False
                 else:
-                    self._add_result('passed', f"Unique constraint exists: {table_name}({', '.join(columns)})")
+                    self._add_result('passed', f"Unique constraint exists: {table_name}({', '.join(column_list)})")
         
         return all_valid
     
@@ -356,16 +355,15 @@ class SchemaValidator:
                 continue
                 
             try:
-                if isinstance(fk_columns, str):
-                    fk_columns = [fk_columns]
-                    ref_columns = [ref_columns]
+                fk_cols = [fk_columns] if isinstance(fk_columns, str) else fk_columns
+                ref_cols = [ref_columns] if isinstance(ref_columns, str) else ref_columns
                 
-                join_conditions = " AND ".join([f"t1.{fk} = t2.{ref}" for fk, ref in zip(fk_columns, ref_columns)])
+                join_conditions = " AND ".join([f"t1.{fk} = t2.{ref}" for fk, ref in zip(fk_cols, ref_cols)])
                 
                 query = f"""
                 SELECT COUNT(*) FROM {table_name} t1
                 LEFT JOIN {ref_table} t2 ON {join_conditions}
-                WHERE t2.{ref_columns[0]} IS NULL
+                WHERE t2.{ref_cols[0]} IS NULL
                 """
                 
                 with get_session() as session:
@@ -455,7 +453,7 @@ class SchemaValidator:
             logger.error(f"Validation failed: {e}")
             raise
     
-    def print_validation_report(self, summary: Dict[str, Any]):
+    def print_validation_report(self, summary: Dict[str, Any]) -> None:
         """Print a formatted validation report."""
         print("\n" + "="*80)
         print("DATABASE SCHEMA VALIDATION REPORT")
@@ -509,7 +507,7 @@ class SchemaValidator:
             print("❌ SCHEMA VALIDATION FAILED - Fix errors above before proceeding")
 
 
-def main():
+def main() -> int:
     """Main validation function."""
     try:
         validator = SchemaValidator()

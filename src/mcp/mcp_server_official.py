@@ -42,16 +42,16 @@ db_helper = DatabaseHelper()
 class TAGScraperMCPServer:
     """MCP Server for TAG Grading Scraper using official MCP SDK"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.server = Server("TAG Grading Scraper 🏷️")
         
         # Register tools
         self._register_tools()
         
-    def _register_tools(self):
+    def _register_tools(self) -> None:
         """Register all MCP tools"""
         
-        @self.server.tool("scrape_sport_years")
+        @self.server.tool("scrape_sport_years")  # type: ignore
         async def scrape_sport_years(request: CallToolRequest) -> CallToolResult:
             """Scrape available years for a specific sport"""
             try:
@@ -87,7 +87,7 @@ class TAGScraperMCPServer:
                     ]
                 )
         
-        @self.server.tool("get_database_stats")
+        @self.server.tool("get_database_stats")  # type: ignore
         async def get_database_stats(request: CallToolRequest) -> CallToolResult:
             """Get statistics about the scraped data in the database"""
             try:
@@ -122,7 +122,7 @@ class TAGScraperMCPServer:
                     ]
                 )
         
-        @self.server.tool("search_cards")
+        @self.server.tool("search_cards")  # type: ignore
         async def search_cards(request: CallToolRequest) -> CallToolResult:
             """Search for cards in the database"""
             try:
@@ -162,7 +162,7 @@ class TAGScraperMCPServer:
                     ]
                 )
         
-        @self.server.tool("get_card_totals_by_type")
+        @self.server.tool("get_card_totals_by_type")  # type: ignore
         async def get_card_totals_by_type(request: CallToolRequest) -> CallToolResult:
             """Get total counts of cards by type, sport, or year"""
             try:
@@ -220,7 +220,7 @@ class TAGScraperMCPServer:
                     ]
                 )
 
-    async def run(self):
+    async def run(self) -> None:
         """Run the MCP server"""
         logger.info("🚀 Starting TAG Grading Scraper MCP Server...")
         logger.info("📚 Available tools:")

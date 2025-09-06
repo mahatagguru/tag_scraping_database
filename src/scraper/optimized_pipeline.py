@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
 import sys
 import time
+from typing import Any, Dict, List, Optional
 
 from db import SessionLocal
 from scraper.card_crawler import extract_card_urls, extract_cards, fetch_rendered_html as fetch_card_html
@@ -38,7 +39,7 @@ MAX_WORKERS = 16  # Increased from 8
 MIN_DELAY = 0.1   # Reduced from 1 second
 BATCH_SIZE = 50   # Process cards in batches
 
-def process_card_url(card_url, session, db_cat, db_year, db_set, snapshot_date):
+def process_card_url(card_url: str, session: Any, db_cat: Any, db_year: Any, db_set: Any, snapshot_date: str) -> None:
     """Process a single card URL with error handling."""
     try:
         card_html = fetch_card_html(card_url)
@@ -89,7 +90,7 @@ def process_card_url(card_url, session, db_cat, db_year, db_set, snapshot_date):
     except Exception as e:
         print(f"          Error processing card {card_url}: {e}")
 
-def process_set_parallel(session, db_cat, db_year, s, cat_name, year, snapshot_date):
+def process_set_parallel(session: Any, db_cat: Any, db_year: Any, s: Dict[str, Any], cat_name: str, year: str, snapshot_date: str) -> int:
     """Process a single set with parallel card processing."""
     try:
         db_set = upsert_set(session, category_id=db_cat.id, year_id=db_year.id, set_name=s['set_name'])
@@ -139,12 +140,12 @@ def process_set_parallel(session, db_cat, db_year, s, cat_name, year, snapshot_d
         print(f"        Error processing set {s['set_name']}: {e}")
         return 0
 
-def optimized_pipeline():
+def optimized_pipeline() -> None:
     """Optimized pipeline with increased parallelism."""
     print("Starting optimized scraping pipeline...")
     print(f"Configuration: {MAX_WORKERS} workers, {MIN_DELAY}s delays, batch size {BATCH_SIZE}")
     
-    snapshot_date = datetime.datetime.now(datetime.timezone.utc)
+    snapshot_date = datetime.datetime.now(datetime.timezone.utc).isoformat()
     session = SessionLocal()
     
     try:
@@ -228,7 +229,8 @@ def optimized_pipeline():
                             for future in as_completed(set_futures):
                                 try:
                                     cards_processed = future.result()
-                                    total_cards += cards_processed
+                                    if cards_processed is not None:
+                                        total_cards += cards_processed
                                 except Exception as e:
                                     print(f"            Set processing error: {e}")
                         
