@@ -5,10 +5,11 @@ Handles the complex logic of parsing set names and building correct URLs.
 """
 
 import re
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import quote
 
 # Common base set names that appear in multiple variations
-COMMON_BASE_SETS = {
+COMMON_BASE_SETS: Dict[str, List[str]] = {
     'Donruss': ['Donruss'],
     'Topps': ['Topps', 'Topps Chrome', 'Topps Finest', 'Topps Now', 'Topps Total Football'],
     'Panini': ['Panini', 'Panini Prizm', 'Panini Select', 'Panini Instant'],
@@ -50,7 +51,7 @@ COMMON_BASE_SETS = {
     'Adrenalyn XL': ['Adrenalyn XL'],
 }
 
-def find_base_set(set_name):
+def find_base_set(set_name: str) -> Tuple[str, Optional[str]]:
     """
     Find the base set name from a set name.
     Returns (base_set, variation) tuple.
@@ -89,7 +90,7 @@ def find_base_set(set_name):
     # No variation found, treat entire name as base
     return set_name, None
 
-def build_set_page_url(category_name, year, set_name, base_url="https://my.taggrading.com"):
+def build_set_page_url(category_name: str, year: str, set_name: str, base_url: str = "https://my.taggrading.com") -> str:
     """
     Build the correct set page URL based on the set name structure.
     """
@@ -105,7 +106,7 @@ def build_set_page_url(category_name, year, set_name, base_url="https://my.taggr
     
     return url
 
-def test_url_builder():
+def test_url_builder() -> None:
     """Test the URL builder with various set name patterns."""
     test_cases = [
         "DonrussNight Moves",

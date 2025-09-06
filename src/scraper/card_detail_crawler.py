@@ -1,10 +1,11 @@
 import sys
+from typing import Any, Dict, List, Optional
 
 from selectolax.parser import HTMLParser
 
 CARD_DETAIL_URL = "https://my.taggrading.com/pop-report/Hockey/1989/O-Pee-Chee/Mario%20Lemieux/1"
 
-def fetch_rendered_html(url):
+def fetch_rendered_html(url: str) -> str:
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -19,7 +20,7 @@ def fetch_rendered_html(url):
         browser.close()
         return html
 
-def extract_card_details(html):
+def extract_card_details(html: str) -> Dict[str, Any]:
     tree = HTMLParser(html)
     # Extract card image URL
     card_img_el = tree.css_first('img[src*="card-images"]')
@@ -42,17 +43,23 @@ def extract_card_details(html):
     variation = variation_el.text(strip=True) if variation_el else None
 
     # Extract table data as before
-    details_list = []
+    details_list: List[Dict[str, Any]] = []
     table = tree.css_first('table.MuiTable-root')
     if table:
         for row in table.css('tbody tr'):
             cells = row.css('td')
             if len(cells) < 8:
                 continue  # skip incomplete rows
+            # Get the link element safely
+            link_el = cells[2].css_first('a')
+            view_report_url = None
+            if link_el and link_el.attributes:
+                view_report_url = link_el.attributes.get('href')
+            
             details = {
                 'rank': cells[0].text(strip=True),
                 'tag_grade': cells[1].text(strip=True),
-                'view_report': cells[2].css_first('a').attributes.get('href') if cells[2].css_first('a') else None,
+                'view_report': view_report_url,
                 'rank_by_grade': cells[3].text(strip=True),
                 'chronology': cells[4].text(strip=True),
                 'chron_by_grade': cells[5].text(strip=True),
@@ -71,19 +78,19 @@ def extract_card_details(html):
         'table_rows': details_list
     }
 
-def extract_cert_urls(html):
+def extract_cert_urls(html: str) -> List[str]:
     tree = HTMLParser(html)
-    urls = []
+    urls: List[str] = []
     for a in tree.css('table.MuiTable-root a'):
-        href = a.attributes.get('href', '')
-        if '/card/' in href:
+        href = a.attributes.get('href', '') if a.attributes else ''
+        if href and '/card/' in href:
             if href.startswith('http'):
                 urls.append(href)
             else:
                 urls.append('https://my.taggrading.com' + href)
     return urls
 
-def fetch_and_print_card_details(url):
+def fetch_and_print_card_details(url: str) -> None:
     html = fetch_rendered_html(url)
     with open("debug_playwright_card_detail_rendered.html", "w", encoding="utf-8") as f:
         f.write(html)

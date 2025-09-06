@@ -1,9 +1,10 @@
 from contextlib import contextmanager
 import os
+from typing import Generator, Iterator
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import create_engine, Engine, text
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 # Always load .env from the project root
 project_root = os.path.dirname(os.path.dirname(__file__))
@@ -40,7 +41,7 @@ try:
     engine = create_engine(POSTGRES_DSN, echo=False, future=True)
     # Test the connection
     with engine.connect() as conn:
-        conn.execute("SELECT 1")
+        conn.execute(text("SELECT 1"))
     print("✅ PostgreSQL connection successful")
 except Exception as e:
     print(f"⚠️  PostgreSQL connection failed: {e}")
@@ -56,7 +57,7 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, futu
 Base = declarative_base()
 
 
-def get_db_session():
+def get_db_session() -> Generator[Session, None, None]:
     """Get a database session."""
     db = SessionLocal()
     try:
@@ -66,7 +67,7 @@ def get_db_session():
 
 
 @contextmanager
-def get_db_session_context():
+def get_db_session_context() -> Iterator[Session]:
     """Get a database session as a context manager."""
     db = SessionLocal()
     try:
@@ -75,6 +76,6 @@ def get_db_session_context():
         db.close()
 
 
-def get_db_connection():
+def get_db_connection() -> Engine:
     """Get a database connection (for backward compatibility)."""
-    return engine.connect()
+    return engine

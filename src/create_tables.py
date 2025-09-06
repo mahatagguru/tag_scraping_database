@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -21,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def migrate_add_card_fields():
+def migrate_add_card_fields() -> None:
     """Add new card fields if they don't exist."""
     with engine.connect() as conn:
         try:
@@ -72,7 +73,7 @@ def migrate_add_card_fields():
             conn.rollback()
             raise
 
-def migrate_add_updated_at():
+def migrate_add_updated_at() -> None:
     """Add updated_at columns to core tables if they don't exist."""
     with engine.connect() as conn:
         try:
@@ -105,7 +106,7 @@ def migrate_add_updated_at():
             raise
 
 
-def migrate_create_population_reports():
+def migrate_create_population_reports() -> None:
     """Create the population_reports table if it doesn't exist."""
     with engine.connect() as conn:
         try:
@@ -164,7 +165,7 @@ def migrate_create_population_reports():
             raise
 
 
-def migrate_create_population_report_partitions(months_ahead=12):
+def migrate_create_population_report_partitions(months_ahead: int = 12) -> None:
     """Create population report partitions for future months."""
     with engine.connect() as conn:
         try:
@@ -197,7 +198,7 @@ def migrate_create_population_report_partitions(months_ahead=12):
             raise
 
 
-def migrate_enhance_audit_logs():
+def migrate_enhance_audit_logs() -> None:
     """Enhance the audit_logs table with new fields for comprehensive error handling."""
     with engine.connect() as conn:
         try:
@@ -286,7 +287,7 @@ def migrate_enhance_audit_logs():
             raise
 
 
-def migrate_add_active_flags():
+def migrate_add_active_flags() -> None:
     """Add is_active flags to core tables for soft deletion support."""
     with engine.connect() as conn:
         try:

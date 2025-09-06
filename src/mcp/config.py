@@ -9,7 +9,7 @@ from typing import Any, Dict
 class FastMCPConfig:
     """Configuration class for FastMCP server settings"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.server_name = "TAG Grading Scraper 🏷️"
         self.server_description = (
             "MCP server for TAG grading data scraping and database operations"
