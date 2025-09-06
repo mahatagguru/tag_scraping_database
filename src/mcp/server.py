@@ -29,7 +29,7 @@ db_helper = DatabaseHelper()
 
 # Typed decorator
 def tool(func: F) -> F:
-    return mcp.tool(func)
+    return mcp.tool(func)  # type: ignore
 
 
 @tool
@@ -270,7 +270,7 @@ def get_pipeline_status() -> Dict[str, Any]:
 
 
 @tool
-def get_card_totals_by_type(card_type: str = None, sport: str = None, year: str = None) -> Dict[str, Any]:
+def get_card_totals_by_type(card_type: Optional[str] = None, sport: Optional[str] = None, year: Optional[str] = None) -> Dict[str, Any]:
     """
     Get total counts of cards by type, sport, or year
     
@@ -324,7 +324,7 @@ def get_card_totals_by_type(card_type: str = None, sport: str = None, year: str 
 
 
 @tool
-def get_card_scores_analysis(min_score: float = None, max_score: float = None, sport: str = None) -> Dict[str, Any]:
+def get_card_scores_analysis(min_score: Optional[float] = None, max_score: Optional[float] = None, sport: Optional[str] = None) -> Dict[str, Any]:
     """
     Analyze card scores and grades
     
@@ -378,7 +378,7 @@ def get_card_scores_analysis(min_score: float = None, max_score: float = None, s
         }
 
 @tool
-def get_card_value_analysis(min_value: float = None, max_value: float = None, grade: str = None) -> Dict[str, Any]:
+def get_card_value_analysis(min_value: Optional[float] = None, max_value: Optional[float] = None, grade: Optional[str] = None) -> Dict[str, Any]:
     """
     Analyze card values and market data
     
@@ -439,7 +439,7 @@ def get_card_value_analysis(min_value: float = None, max_value: float = None, gr
         }
 
 @tool
-def get_set_completion_status(set_name: str, sport: str = None, year: str = None) -> Dict[str, Any]:
+def get_set_completion_status(set_name: str, sport: Optional[str] = None, year: Optional[str] = None) -> Dict[str, Any]:
     """
     Get completion status of card sets
     
@@ -490,7 +490,7 @@ def get_set_completion_status(set_name: str, sport: str = None, year: str = None
         }
 
 @tool
-def get_player_card_collection(player_name: str, sport: str = None, min_grade: float = None) -> Dict[str, Any]:
+def get_player_card_collection(player_name: str, sport: Optional[str] = None, min_grade: Optional[float] = None) -> Dict[str, Any]:
     """
     Get comprehensive collection data for a specific player
     
@@ -547,7 +547,7 @@ def get_player_card_collection(player_name: str, sport: str = None, min_grade: f
         }
 
 @tool
-def get_market_trends_analysis(days: int = 30, sport: str = None, card_type: str = None) -> Dict[str, Any]:
+def get_market_trends_analysis(days: int = 30, sport: Optional[str] = None, card_type: Optional[str] = None) -> Dict[str, Any]:
     """
     Analyze market trends and price movements
     
