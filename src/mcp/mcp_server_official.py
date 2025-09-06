@@ -18,26 +18,14 @@ try:
     from mcp.types import (
         CallToolRequest,
         CallToolResult,
-        DataType,
-        EmbeddedResource,
-        GetSchemasRequest,
-        GetSchemasResult,
-        ImageContent,
-        ListResourcesRequest,
-        ListResourcesResult,
-        ListToolsRequest,
-        ListToolsResult,
-        Property,
-        ReadResourceRequest,
-        ReadResourceResult,
-        Resource,
-        Schema,
         TextContent,
-        Tool,
     )
 except ImportError:
     print("❌ MCP SDK not found. Install with: pip install mcp")
-    print("   Or install FastMCP from GitHub: pip install git+https://github.com/jlowin/fastmcp.git")
+    print(
+        "   Or install FastMCP from GitHub: "
+        "pip install git+https://github.com/jlowin/fastmcp.git"
+    )
     sys.exit(1)
 
 from db import get_db_connection
@@ -82,7 +70,9 @@ class TAGScraperMCPServer:
                 }
                 
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(result, indent=2))
+                    ]
                 )
             except Exception as e:
                 error_result = {
@@ -92,7 +82,9 @@ class TAGScraperMCPServer:
                     "message": f"Failed to scrape years for {sport}"
                 }
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(error_result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(error_result, indent=2))
+                    ]
                 )
         
         @self.server.tool("get_database_stats")
@@ -114,7 +106,9 @@ class TAGScraperMCPServer:
                 }
                 
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(result, indent=2))
+                    ]
                 )
             except Exception as e:
                 error_result = {
@@ -123,7 +117,9 @@ class TAGScraperMCPServer:
                     "message": "Failed to retrieve database statistics"
                 }
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(error_result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(error_result, indent=2))
+                    ]
                 )
         
         @self.server.tool("search_cards")
@@ -149,7 +145,9 @@ class TAGScraperMCPServer:
                 }
                 
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(result, indent=2))
+                    ]
                 )
             except Exception as e:
                 error_result = {
@@ -159,7 +157,9 @@ class TAGScraperMCPServer:
                     "message": f"Failed to search for cards with query '{query}'"
                 }
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(error_result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(error_result, indent=2))
+                    ]
                 )
         
         @self.server.tool("get_card_totals_by_type")
@@ -204,7 +204,9 @@ class TAGScraperMCPServer:
                 }
                 
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(result, indent=2))
+                    ]
                 )
             except Exception as e:
                 error_result = {
@@ -213,9 +215,11 @@ class TAGScraperMCPServer:
                     "message": "Failed to retrieve card totals"
                 }
                 return CallToolResult(
-                    content=[TextContent(type="text", text=json.dumps(error_result, indent=2))]
+                    content=[
+                        TextContent(type="text", text=json.dumps(error_result, indent=2))
+                    ]
                 )
-    
+
     async def run(self):
         """Run the MCP server"""
         logger.info("🚀 Starting TAG Grading Scraper MCP Server...")
@@ -229,6 +233,7 @@ class TAGScraperMCPServer:
         # Run the server
         async with self.server.run_stdio(StdioServerParameters()):
             await asyncio.Future()  # Run forever
+
 
 if __name__ == "__main__":
     server = TAGScraperMCPServer()

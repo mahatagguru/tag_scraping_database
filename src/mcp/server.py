@@ -3,10 +3,9 @@ FastMCP Server for TAG Grading Scraper
 Exposes scraping tools and database operations through the Model Context Protocol
 """
 
-import asyncio
 from pathlib import Path
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from fastmcp import FastMCP
 
@@ -24,6 +23,7 @@ mcp = FastMCP("TAG Grading Scraper 🏷️")
 
 # Initialize database helper
 db_helper = DatabaseHelper()
+
 
 @mcp.tool
 def scrape_sport_years(sport: str) -> Dict[str, Any]:
@@ -53,6 +53,7 @@ def scrape_sport_years(sport: str) -> Dict[str, Any]:
             "error": str(e),
             "message": f"Failed to scrape years for {sport}"
         }
+
 
 @mcp.tool
 def scrape_sets_for_year(sport: str, year: str) -> Dict[str, Any]:
@@ -86,6 +87,7 @@ def scrape_sets_for_year(sport: str, year: str) -> Dict[str, Any]:
             "message": f"Failed to scrape sets for {sport} {year}"
         }
 
+
 @mcp.tool
 def scrape_cards_for_set(set_name: str, limit: Optional[int] = 100) -> Dict[str, Any]:
     """
@@ -116,6 +118,7 @@ def scrape_cards_for_set(set_name: str, limit: Optional[int] = 100) -> Dict[str,
             "message": f"Failed to scrape cards for set {set_name}"
         }
 
+
 @mcp.tool
 def get_database_stats() -> Dict[str, Any]:
     """
@@ -137,6 +140,7 @@ def get_database_stats() -> Dict[str, Any]:
             "error": str(e),
             "message": "Failed to retrieve database statistics"
         }
+
 
 @mcp.tool
 def search_cards(query: str, limit: Optional[int] = 50) -> Dict[str, Any]:
@@ -166,6 +170,7 @@ def search_cards(query: str, limit: Optional[int] = 50) -> Dict[str, Any]:
             "error": str(e),
             "message": f"Failed to search for cards with query '{query}'"
         }
+
 
 @mcp.tool
 def run_full_pipeline(sport: str, year: str, set_name: Optional[str] = None) -> Dict[str, Any]:
@@ -201,6 +206,7 @@ def run_full_pipeline(sport: str, year: str, set_name: Optional[str] = None) -> 
             "message": f"Failed to run full pipeline for {sport} {year}"
         }
 
+
 @mcp.tool
 def get_available_sports() -> Dict[str, Any]:
     """
@@ -224,6 +230,7 @@ def get_available_sports() -> Dict[str, Any]:
             "error": str(e),
             "message": "Failed to retrieve available sports"
         }
+
 
 @mcp.tool
 def get_pipeline_status() -> Dict[str, Any]:
@@ -253,6 +260,7 @@ def get_pipeline_status() -> Dict[str, Any]:
             "error": str(e),
             "message": "Failed to retrieve pipeline status"
         }
+
 
 @mcp.tool
 def get_card_totals_by_type(card_type: str = None, sport: str = None, year: str = None) -> Dict[str, Any]:
@@ -298,7 +306,7 @@ def get_card_totals_by_type(card_type: str = None, sport: str = None, year: str 
         return {
             "success": True,
             "totals": totals,
-            "message": f"Successfully retrieved card totals"
+            "message": "Successfully retrieved card totals"
         }
     except Exception as e:
         return {
@@ -306,6 +314,7 @@ def get_card_totals_by_type(card_type: str = None, sport: str = None, year: str 
             "error": str(e),
             "message": "Failed to retrieve card totals"
         }
+
 
 @mcp.tool
 def get_card_scores_analysis(min_score: float = None, max_score: float = None, sport: str = None) -> Dict[str, Any]:

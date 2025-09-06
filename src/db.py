@@ -1,5 +1,5 @@
-import os
 from contextlib import contextmanager
+import os
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
@@ -19,9 +19,14 @@ POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
 
 # Construct PostgreSQL DSN
 if POSTGRES_PASSWORD:
-    POSTGRES_DSN = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    POSTGRES_DSN = (
+        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@"
+        f"{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    )
 else:
-    POSTGRES_DSN = f"postgresql://{POSTGRES_USER}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    POSTGRES_DSN = (
+        f"postgresql://{POSTGRES_USER}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    )
 
 print("Database Configuration:")
 print(f"  Host: {POSTGRES_HOST}")
@@ -50,6 +55,7 @@ except Exception as e:
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 Base = declarative_base()
 
+
 def get_db_session():
     """Get a database session."""
     db = SessionLocal()
@@ -57,6 +63,7 @@ def get_db_session():
         yield db
     finally:
         db.close()
+
 
 @contextmanager
 def get_db_session_context():
@@ -66,6 +73,7 @@ def get_db_session_context():
         yield db
     finally:
         db.close()
+
 
 def get_db_connection():
     """Get a database connection (for backward compatibility)."""

@@ -28,6 +28,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
 
+from db import SessionLocal
+from models import AuditLog
 from scraper.db_helpers import (
     upsert_card_grade_row,
     upsert_cards_per_set,
@@ -37,8 +39,6 @@ from scraper.db_helpers import (
 )
 from scraper.multi_level_orchestrator import MultiLevelOrchestrator
 from scraper.pipeline import discover_categories
-from db import SessionLocal
-from models import AuditLog
 
 # Configuration
 BASE_URL = "https://my.taggrading.com"

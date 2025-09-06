@@ -171,8 +171,9 @@ def discover_categories() -> List[str]:
     """
     try:
         from selectolax.parser import HTMLParser
+
         from scraper.sport_years_scraper import fetch_rendered_html
-        
+
         # Test all known categories directly instead of relying on main page text
         potential_categories = [
             'Baseball', 'Basketball', 'Football', 'Hockey', 'MMA', 'Soccer', 'Racing', 

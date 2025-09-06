@@ -5,7 +5,6 @@ Demonstrates how to connect to and use the FastMCP server
 
 import asyncio
 import json
-from typing import Any, Dict
 
 from fastmcp import FastMCPClient
 
@@ -96,6 +95,7 @@ async def main():
         await client.close()
         print("\n🔌 Connection closed")
 
+
 def run_sync_example():
     """Synchronous version of the client example"""
     
@@ -140,6 +140,7 @@ def run_sync_example():
         # Close the connection
         client.close_sync()
         print("\n🔌 Connection closed")
+
 
 if __name__ == "__main__":
     print("🚀 FastMCP Client Example for TAG Grading Scraper")

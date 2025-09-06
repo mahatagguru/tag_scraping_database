@@ -3,7 +3,6 @@ FastMCP Server Configuration for TAG Grading Scraper
 """
 
 import os
-from pathlib import Path
 from typing import Any, Dict
 
 
@@ -12,7 +11,9 @@ class FastMCPConfig:
     
     def __init__(self):
         self.server_name = "TAG Grading Scraper 🏷️"
-        self.server_description = "MCP server for TAG grading data scraping and database operations"
+        self.server_description = (
+            "MCP server for TAG grading data scraping and database operations"
+        )
         self.version = "1.0.0"
         
         # Server settings
@@ -27,7 +28,9 @@ class FastMCPConfig:
         # Scraping settings
         self.max_concurrent_scrapes = int(os.getenv("MAX_CONCURRENT_SCRAPES", "5"))
         self.scrape_timeout = int(os.getenv("SCRAPE_TIMEOUT", "300"))  # 5 minutes
-        self.rate_limit_delay = float(os.getenv("RATE_LIMIT_DELAY", "1.0"))  # 1 second
+        self.rate_limit_delay = float(
+            os.getenv("RATE_LIMIT_DELAY", "1.0")
+        )  # 1 second
         
         # MCP Protocol settings
         self.mcp_version = "2024-11-05"
@@ -99,6 +102,7 @@ class FastMCPConfig:
 # Global configuration instance
 config = FastMCPConfig()
 
+
 # Environment-specific configurations
 def get_production_config() -> FastMCPConfig:
     """Get production configuration"""
@@ -109,6 +113,7 @@ def get_production_config() -> FastMCPConfig:
     prod_config.require_auth = True
     prod_config.log_level = "WARNING"
     return prod_config
+
 
 def get_development_config() -> FastMCPConfig:
     """Get development configuration"""
