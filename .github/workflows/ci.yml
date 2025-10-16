@@ -44,7 +44,7 @@ jobs:
             isort --check-only --diff src/
             ;;
           "flake8")
-            flake8 src/ --max-line-length=88 --extend-ignore=E203,W503
+            flake8 src/
             ;;
           "mypy")
             mypy src/ --ignore-missing-imports --no-strict-optional
