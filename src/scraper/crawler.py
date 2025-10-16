@@ -10,12 +10,15 @@ from selectolax.parser import HTMLParser
 
 CATEGORY_URL = "https://my.taggrading.com/pop-report"
 
+
 # --- Playwright integration ---
 def fetch_rendered_html(url):
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
-        print("Playwright is not installed. Please run: pip install playwright && python3 -m playwright install")
+        print(
+            "Playwright is not installed. Please run: pip install playwright && python3 -m playwright install"
+        )
         raise
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -26,28 +29,31 @@ def fetch_rendered_html(url):
         browser.close()
         return html
 
+
 def extract_categories(html):
     tree = HTMLParser(html)
     categories = []
     # Each category is in a MuiGrid-item MuiGrid-grid-lg-2
-    for card in tree.css('.MuiGrid-item.MuiGrid-grid-lg-2'):
-        name_el = card.css_first('h6')
-        img_el = card.css_first('img')
+    for card in tree.css(".MuiGrid-item.MuiGrid-grid-lg-2"):
+        name_el = card.css_first("h6")
+        img_el = card.css_first("img")
         if not (name_el and img_el):
             continue
         name = name_el.text(strip=True)
-        img = img_el.attributes.get('src')
-        categories.append({'name': name, 'img': img})
+        img = img_el.attributes.get("src")
+        categories.append({"name": name, "img": img})
     return categories
+
 
 def extract_category_urls(html):
     tree = HTMLParser(html)
     urls = []
-    for a in tree.css('a'):
-        href = a.attributes.get('href', '')
-        if href.startswith('/pop-report/') and href.count('/') == 2:
-            urls.append('https://my.taggrading.com' + href)
+    for a in tree.css("a"):
+        href = a.attributes.get("href", "")
+        if href.startswith("/pop-report/") and href.count("/") == 2:
+            urls.append("https://my.taggrading.com" + href)
     return urls
+
 
 def fetch_and_print_categories(url):
     html = fetch_rendered_html(url)
@@ -59,6 +65,7 @@ def fetch_and_print_categories(url):
     print(f"Found {len(categories)} categories:")
     for cat in categories:
         print(f"- {cat['name']} | img: {cat['img']}")
+
 
 if __name__ == "__main__":
     fetch_and_print_categories(CATEGORY_URL)

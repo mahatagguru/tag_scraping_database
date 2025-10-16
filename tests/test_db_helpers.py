@@ -14,6 +14,7 @@ def test_db_helpers_import():
     """Test that db_helpers can be imported."""
     try:
         from scraper.db_helpers import DatabaseHelper
+
         assert DatabaseHelper is not None
     except ImportError as e:
         pytest.fail(f"Failed to import DatabaseHelper: {e}")
@@ -23,13 +24,15 @@ def test_db_helpers_structure():
     """Test that DatabaseHelper has expected structure."""
     try:
         from scraper.db_helpers import DatabaseHelper
-        
+
         # Check if class exists and has expected methods
-        assert hasattr(DatabaseHelper, '__init__'), "DatabaseHelper should have __init__ method"
-        
+        assert hasattr(
+            DatabaseHelper, "__init__"
+        ), "DatabaseHelper should have __init__ method"
+
         # Add more specific checks as needed
         assert True, "DatabaseHelper structure is valid"
-        
+
     except Exception as e:
         pytest.fail(f"DatabaseHelper structure test failed: {e}")
 

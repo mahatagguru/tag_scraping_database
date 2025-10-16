@@ -14,6 +14,7 @@ def test_models_import():
     """Test that models can be imported."""
     try:
         import models
+
         assert models is not None
     except ImportError as e:
         pytest.fail(f"Failed to import models: {e}")
@@ -23,13 +24,13 @@ def test_models_structure():
     """Test that models have expected structure."""
     try:
         import models
-        
+
         # Check if key classes exist
-        assert hasattr(models, 'Base'), "Base class should exist"
-        
+        assert hasattr(models, "Base"), "Base class should exist"
+
         # Add more specific model checks as needed
         assert True, "Models structure is valid"
-        
+
     except Exception as e:
         pytest.fail(f"Models structure test failed: {e}")
 

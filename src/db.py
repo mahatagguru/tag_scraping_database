@@ -8,15 +8,15 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 # Always load .env from the project root
 project_root = os.path.dirname(os.path.dirname(__file__))
-dotenv_path = os.path.join(project_root, '.env')
+dotenv_path = os.path.join(project_root, ".env")
 load_dotenv(dotenv_path=dotenv_path)
 
 # Get individual database configuration variables
-POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
-POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', '')
-POSTGRES_DB = os.getenv('POSTGRES_DB', 'tag_scraper')
-POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
-POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
+POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "tag_scraper")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 
 # Construct PostgreSQL DSN
 if POSTGRES_PASSWORD:
@@ -46,9 +46,9 @@ try:
 except Exception as e:
     print(f"⚠️  PostgreSQL connection failed: {e}")
     print("🔄 Falling back to SQLite database")
-    
+
     # Fallback to SQLite
-    sqlite_path = os.path.join(project_root, 'tag_scraper_local.db')
+    sqlite_path = os.path.join(project_root, "tag_scraper_local.db")
     sqlite_dsn = f"sqlite:///{sqlite_path}"
     engine = create_engine(sqlite_dsn, echo=False, future=True)
     print(f"✅ SQLite database created at: {sqlite_path}")

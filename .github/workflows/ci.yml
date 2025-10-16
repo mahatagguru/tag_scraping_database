@@ -86,13 +86,12 @@ jobs:
         
     - name: Run tests with SQLite
       run: |
-        cd src
-        python -m pytest . -v --cov=. --cov-report=xml --cov-report=html
+        python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        file: ./src/coverage.xml
+        file: ./coverage.xml
         flags: sqlite
         name: sqlite-coverage
 
@@ -153,13 +152,12 @@ jobs:
         
     - name: Run tests with PostgreSQL
       run: |
-        cd src
-        python -m pytest . -v --cov=. --cov-report=xml --cov-report=html
+        python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=html
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        file: ./src/coverage.xml
+        file: ./coverage.xml
         flags: postgresql
         name: postgresql-coverage
 

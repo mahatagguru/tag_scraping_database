@@ -14,6 +14,7 @@ def test_imports():
     """Test that basic modules can be imported."""
     try:
         import models
+
         assert True, "models module imported successfully"
     except ImportError as e:
         pytest.fail(f"Failed to import models: {e}")
@@ -23,6 +24,7 @@ def test_database_connection():
     """Test basic database functionality."""
     try:
         from db import get_db_connection
+
         # This should not raise an error
         assert True, "Database connection module imported successfully"
     except ImportError as e:
@@ -33,6 +35,7 @@ def test_scraper_imports():
     """Test that scraper modules can be imported."""
     try:
         from scraper.unified_pipeline import UnifiedPipeline
+
         assert True, "UnifiedPipeline imported successfully"
     except ImportError as e:
         pytest.fail(f"Failed to import UnifiedPipeline: {e}")
