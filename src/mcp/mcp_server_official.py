@@ -15,11 +15,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 try:
     from mcp import Server, StdioServerParameters
-    from mcp.types import (
-        CallToolRequest,
-        CallToolResult,
-        TextContent,
-    )
+    from mcp.types import CallToolRequest, CallToolResult, TextContent
 except ImportError:
     print("❌ MCP SDK not found. Install with: pip install mcp")
     print(

@@ -17,12 +17,12 @@ Usage:
 
 import argparse
 import datetime
-from typing import Any, Dict, List, Optional
 
 # Add project root to path
 import os
 import sys
 import time
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
