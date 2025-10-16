@@ -18,6 +18,8 @@ import time
 
 from sqlalchemy.orm import Session
 
+from db import Base, engine
+
 from scraper.card_grade_rows_scraper import extract_grade_rows_from_url
 from scraper.cards_scraper import extract_cards_from_url
 from scraper.db_helpers import (
@@ -244,6 +246,9 @@ def test_database_storage():
     print("=" * 60)
 
     try:
+        # Create database tables
+        Base.metadata.create_all(bind=engine)
+        
         # Create a test session
         session = SessionLocal()
 

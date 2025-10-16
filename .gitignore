@@ -119,3 +119,9 @@ celerybeat.pid
 .dmypy.json
 dmypy.json
 .env
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

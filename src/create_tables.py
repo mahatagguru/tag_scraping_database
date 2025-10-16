@@ -1,5 +1,6 @@
 import datetime
 import logging
+
 from dotenv import load_dotenv
 from sqlalchemy import text
 
