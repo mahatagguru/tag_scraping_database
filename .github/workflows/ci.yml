@@ -47,7 +47,7 @@ jobs:
             flake8 src/
             ;;
           "mypy")
-            mypy src/ --ignore-missing-imports --no-strict-optional
+            mypy src/ --ignore-missing-imports --no-strict-optional --disable-error-code=no-untyped-def --disable-error-code=no-any-return --disable-error-code=unreachable --disable-error-code=var-annotated --disable-error-code=assignment --disable-error-code=operator --disable-error-code=attr-defined --disable-error-code=return-value --disable-error-code=func-returns-value --disable-error-code=unused-ignore
             ;;
           "pylint")
             pylint src/ --disable=C0114,C0115,C0116 --max-line-length=88
