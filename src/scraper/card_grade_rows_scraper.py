@@ -165,7 +165,7 @@ def extract_grade_rows_from_card_page(
     # Find the main results table
     tables = tree.css("table.MuiTable-root")
     if not tables:
-        print(f"      No tables found on card page")
+        print("      No tables found on card page")
         return grade_rows
 
     # Look for table with grade-related headers
@@ -185,7 +185,7 @@ def extract_grade_rows_from_card_page(
             break
 
     if not target_table:
-        print(f"      No suitable grade table found")
+        print("      No suitable grade table found")
         return grade_rows
 
     print(f"      Found grade table with {len(column_map)} mapped columns")
@@ -232,7 +232,7 @@ def extract_grade_rows_from_card_page(
                             row_data[
                                 "completed_date_iso"
                             ] = dt  # Store as datetime object, not string
-                        except:
+                        except Exception:
                             # Fallback to display text
                             date_text = normalize_text(cell.text())
                             raw_date, dt = parse_date_to_iso(date_text)
@@ -266,12 +266,12 @@ def extract_grade_rows_from_card_page(
 
         # Ensure we have a cert_number (required field)
         if "cert_number" not in row_data or not row_data["cert_number"]:
-            print(f"        Skipping row without cert_number")
+            print("        Skipping row without cert_number")
             continue
 
         # Skip rows with missing essential data
         if not row_data.get("tag_grade"):
-            print(f"        Skipping row without tag_grade")
+            print("        Skipping row without tag_grade")
             continue
 
         # Validate report URL if present

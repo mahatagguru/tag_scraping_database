@@ -195,7 +195,7 @@ class MultiRunnerOrchestrator:
                                 ) and line.strip().endswith("}"):
                                     runner.results = json.loads(line.strip())
                                     break
-                        except:
+                        except Exception:
                             pass
                     else:
                         logger.error(

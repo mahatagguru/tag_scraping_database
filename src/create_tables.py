@@ -1,12 +1,9 @@
 import datetime
 import logging
-from typing import Any, Dict, List, Optional
-
 from dotenv import load_dotenv
 from sqlalchemy import text
 
 from db import Base, engine  # ensures engine and Base are loaded
-import models  # ensures all models are registered
 
 load_dotenv()
 
@@ -723,7 +720,8 @@ def migrate_add_multi_level_indexes():
                     if table_exists:
                         conn.execute(
                             text(
-                                f'CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({", ".join(columns)});'
+                                f'CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({
+                                    ", ".join(columns)});'
                             )
                         )
                         logger.info(f"Added index: {index_name}")
@@ -809,7 +807,8 @@ def migrate_postgresql_optimizations():
                 try:
                     conn.execute(
                         text(
-                            f'CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({index_name.split("_")[1]}) WHERE {condition};'
+                            f'CREATE INDEX IF NOT EXISTS {index_name} ON {table} ({
+                                index_name.split("_")[1]}) WHERE {condition};'
                         )
                     )
                     logger.info(f"Added partial index: {index_name}")

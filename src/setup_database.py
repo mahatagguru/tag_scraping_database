@@ -3,7 +3,6 @@ Database Setup Script for TAG Grading Scraper
 Run this script to create the basic database structure
 """
 
-import os
 from pathlib import Path
 import sqlite3
 
@@ -167,9 +166,9 @@ def create_basic_tables() -> None:
 
         # Commit changes
         conn.commit()
-        print(f"\n🎉 Database setup complete!")
+        print("\n🎉 Database setup complete!")
         print(f"📊 Database location: {db_path}")
-        print(f"💡 You can now run the schema validation: python src/validate_schema.py")
+        print("💡 You can now run the schema validation: python src/validate_schema.py")
 
     except Exception as e:
         print(f"❌ Error setting up database: {e}")

@@ -15,7 +15,7 @@ import os
 import sys
 import time
 import traceback
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session

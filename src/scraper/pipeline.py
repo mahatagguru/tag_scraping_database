@@ -552,7 +552,7 @@ def main() -> None:
                 card_filter=args.card_filter,
             )
 
-            logger.info(f"\nPipeline completed successfully!")
+            logger.info("\nPipeline completed successfully!")
             logger.info(f"Categories: {len(results['categories_processed'])}")
             logger.info(f"Years: {results['total_years']}")
             logger.info(f"Sets: {results['total_sets']}")

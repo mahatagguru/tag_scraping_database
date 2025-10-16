@@ -198,7 +198,7 @@ def print_final_summary(summaries: List[Dict[str, Any]]) -> None:
             failed_sports += 1
             print(f"❓ {sport}: UNKNOWN STATUS")
 
-    print(f"\n📊 STATISTICS:")
+    print("\n📊 STATISTICS:")
     print(f"   Total Sports: {total_sports}")
     print(f"   Successful: {successful_sports}")
     print(f"   Failed: {failed_sports}")

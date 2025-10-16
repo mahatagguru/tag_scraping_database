@@ -570,7 +570,7 @@ def main():
             total_years += summary["years_found"]
             total_sets += summary["total_sets"]
 
-    print(f"\nTOTAL ACROSS ALL SPORTS:")
+    print("\nTOTAL ACROSS ALL SPORTS:")
     print(f"  Years: {total_years}")
     print(f"  Sets: {total_sets}")
     print("=" * 80)
