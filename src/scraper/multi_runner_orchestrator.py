@@ -233,9 +233,7 @@ class MultiRunnerOrchestrator:
 
     def monitor_runners(self, check_interval: float = 10.0):
         """Monitor all runners and report status"""
-        logger.info(
-            f"📊 Starting runner monitoring (check interval: {check_interval}s)"
-        )
+        logger.info(f"📊 Starting runner monitoring (check interval: {check_interval}s)")
 
         while not self.shutdown_event.is_set():
             try:

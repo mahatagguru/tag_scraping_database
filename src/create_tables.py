@@ -80,7 +80,8 @@ def migrate_add_updated_at() -> None:
                     if "updated_at" not in existing_columns:
                         conn.execute(
                             text(
-                                f"ALTER TABLE {table} ADD COLUMN updated_at TEXT DEFAULT (datetime('now'));"
+                                f"ALTER TABLE {table} ADD COLUMN updated_at TEXT "
+                                f"DEFAULT (datetime('now'));"
                             )
                         )
                 else:
@@ -159,13 +160,16 @@ def migrate_create_population_reports() -> None:
                 conn.execute(
                     text(
                         f"""
-                    CREATE TABLE IF NOT EXISTS {partition_name} PARTITION OF population_reports
-                    FOR VALUES FROM ('{first_of_month.isoformat()}') TO ('{next_month.isoformat()}');
+                    CREATE TABLE IF NOT EXISTS {partition_name} 
+                    PARTITION OF population_reports
+                    FOR VALUES FROM ('{first_of_month.isoformat()}') 
+                    TO ('{next_month.isoformat()}');
                     """
                     )
                 )
                 logger.info(
-                    "Successfully created PostgreSQL population_reports table and partition"
+                    "Successfully created PostgreSQL population_reports table "
+                    "and partition"
                 )
 
             conn.commit()
@@ -200,8 +204,10 @@ def migrate_create_population_report_partitions(months_ahead: int = 12) -> None:
                 conn.execute(
                     text(
                         f"""
-                    CREATE TABLE IF NOT EXISTS {partition_name} PARTITION OF population_reports
-                    FOR VALUES FROM ('{first_of_month.isoformat()}') TO ('{next_month.isoformat()}');
+                    CREATE TABLE IF NOT EXISTS {partition_name} 
+                    PARTITION OF population_reports
+                    FOR VALUES FROM ('{first_of_month.isoformat()}') 
+                    TO ('{next_month.isoformat()}');
                     """
                     )
                 )
@@ -253,7 +259,8 @@ def migrate_enhance_audit_logs() -> None:
                         # For PostgreSQL, use IF NOT EXISTS
                         conn.execute(
                             text(
-                                f"ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS {column_def};"
+                                f"ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS "
+                                f"{column_def};"
                             )
                         )
                         logger.info(f"Added column: {column_name}")
@@ -338,14 +345,16 @@ def migrate_add_active_flags() -> None:
                     if "is_active" not in existing_columns:
                         conn.execute(
                             text(
-                                f"ALTER TABLE {table} ADD COLUMN is_active INTEGER DEFAULT 1 NOT NULL;"
+                                f"ALTER TABLE {table} ADD COLUMN is_active INTEGER "
+                                f"DEFAULT 1 NOT NULL;"
                             )
                         )
                 else:
                     # For PostgreSQL, use IF NOT EXISTS
                     conn.execute(
                         text(
-                            f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE NOT NULL;"
+                            f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS "
+                            f"is_active BOOLEAN DEFAULT TRUE NOT NULL;"
                         )
                     )
 
@@ -400,7 +409,8 @@ def migrate_add_description_fields():
                 # For PostgreSQL, use IF NOT EXISTS
                 conn.execute(
                     text(
-                        "ALTER TABLE categories ADD COLUMN IF NOT EXISTS description TEXT;"
+                        "ALTER TABLE categories ADD COLUMN IF NOT EXISTS "
+                        "description TEXT;"
                     )
                 )
                 conn.execute(
@@ -437,7 +447,8 @@ def migrate_add_grade_value():
                 # For PostgreSQL, use IF NOT EXISTS
                 conn.execute(
                     text(
-                        "ALTER TABLE grades ADD COLUMN IF NOT EXISTS grade_value SMALLINT;"
+                        "ALTER TABLE grades ADD COLUMN IF NOT EXISTS "
+                        "grade_value SMALLINT;"
                     )
                 )
 
@@ -477,7 +488,8 @@ def migrate_add_snapshot_fields():
                 if "is_complete" not in existing_columns:
                     conn.execute(
                         text(
-                            "ALTER TABLE snapshots ADD COLUMN is_complete INTEGER DEFAULT 0;"
+                            "ALTER TABLE snapshots ADD COLUMN is_complete INTEGER "
+                            "DEFAULT 0;"
                         )
                     )
             else:
@@ -487,7 +499,8 @@ def migrate_add_snapshot_fields():
                 )
                 conn.execute(
                     text(
-                        "ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS is_complete BOOLEAN DEFAULT FALSE NOT NULL;"
+                        "ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS "
+                        "is_complete BOOLEAN DEFAULT FALSE NOT NULL;"
                     )
                 )
 
@@ -540,7 +553,9 @@ def migrate_add_totals_timestamps():
                     # For PostgreSQL, use IF NOT EXISTS
                     conn.execute(
                         text(
-                            f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS last_updated TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL;"
+                            f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS "
+                            f"last_updated TIMESTAMP WITH TIME ZONE DEFAULT now() "
+                            f"NOT NULL;"
                         )
                     )
 
@@ -634,7 +649,8 @@ def migrate_add_check_constraints():
                 try:
                     conn.execute(
                         text(
-                            f"ALTER TABLE {table} ADD CONSTRAINT {constraint_name} CHECK ({constraint_def});"
+                            f"ALTER TABLE {table} ADD CONSTRAINT {constraint_name} "
+                            f"CHECK ({constraint_def});"
                         )
                     )
                     logger.info(f"Added constraint: {constraint_name}")
@@ -684,18 +700,46 @@ def migrate_add_multi_level_indexes():
                     ["sport", "year", "set_title"],
                     "ix_cards_per_set_sport_year_set",
                 ),
-                ("cards_per_set", ["card_name"], "ix_cards_per_set_card_name"),
-                ("cards_per_set", ["is_active"], "ix_cards_per_set_active"),
-                ("cards_per_set", ["discovered_at"], "ix_cards_per_set_discovered"),
+                (
+                    "cards_per_set",
+                    ["card_name"],
+                    "ix_cards_per_set_card_name",
+                ),
+                (
+                    "cards_per_set",
+                    ["is_active"],
+                    "ix_cards_per_set_active",
+                ),
+                (
+                    "cards_per_set",
+                    ["discovered_at"],
+                    "ix_cards_per_set_discovered",
+                ),
                 (
                     "card_grade_rows",
                     ["sport", "year", "set_title", "card_name"],
                     "ix_card_grade_rows_sport_year_set_card",
                 ),
-                ("card_grade_rows", ["cert_number"], "ix_card_grade_rows_cert_number"),
-                ("card_grade_rows", ["tag_grade"], "ix_card_grade_rows_tag_grade"),
-                ("card_grade_rows", ["is_active"], "ix_card_grade_rows_active"),
-                ("card_grade_rows", ["discovered_at"], "ix_card_grade_rows_discovered"),
+                (
+                    "card_grade_rows",
+                    ["cert_number"],
+                    "ix_card_grade_rows_cert_number",
+                ),
+                (
+                    "card_grade_rows",
+                    ["tag_grade"],
+                    "ix_card_grade_rows_tag_grade",
+                ),
+                (
+                    "card_grade_rows",
+                    ["is_active"],
+                    "ix_card_grade_rows_active",
+                ),
+                (
+                    "card_grade_rows",
+                    ["discovered_at"],
+                    "ix_card_grade_rows_discovered",
+                ),
             ]
 
             for table, columns, index_name in multi_level_tables:
@@ -721,8 +765,8 @@ def migrate_add_multi_level_indexes():
                     if table_exists:
                         conn.execute(
                             text(
-                                f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ("
-                                f'{", ".join(columns)});'
+                                f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} "
+                                f"({', '.join(columns)});"
                             )
                         )
                         logger.info(f"Added index: {index_name}")
@@ -789,7 +833,8 @@ def migrate_postgresql_optimizations():
                 try:
                     conn.execute(
                         text(
-                            f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} USING BRIN ({column});"
+                            f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} "
+                            f"USING BRIN ({column});"
                         )
                     )
                     logger.info(f"Added BRIN index: {index_name}")

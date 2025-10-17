@@ -229,25 +229,25 @@ def extract_grade_rows_from_card_page(
                                 iso_timestamp = iso_timestamp[:-1]  # Remove Z suffix
                             dt = datetime.fromisoformat(iso_timestamp)
                             row_data["completed_date_raw"] = dt.strftime("%m-%d-%Y")
-                            row_data["completed_date_iso"] = (
-                                dt  # Store as datetime object, not string
-                            )
+                            row_data[
+                                "completed_date_iso"
+                            ] = dt  # Store as datetime object, not string
                         except Exception:
                             # Fallback to display text
                             date_text = normalize_text(cell.text())
                             raw_date, dt = parse_date_to_iso(date_text)
                             row_data["completed_date_raw"] = raw_date
-                            row_data["completed_date_iso"] = (
-                                dt  # Store as datetime object, not string
-                            )
+                            row_data[
+                                "completed_date_iso"
+                            ] = dt  # Store as datetime object, not string
                     else:
                         # Use display text
                         date_text = normalize_text(cell.text())
                         raw_date, dt = parse_date_to_iso(date_text)
                         row_data["completed_date_raw"] = raw_date
-                        row_data["completed_date_iso"] = (
-                            dt  # Store as datetime object, not string
-                        )
+                        row_data[
+                            "completed_date_iso"
+                        ] = dt  # Store as datetime object, not string
                 else:
                     # Regular text field - handle special cases
                     if field in ["chronology", "chron_by_grade"]:
