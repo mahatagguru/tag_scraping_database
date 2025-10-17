@@ -248,7 +248,7 @@ def test_database_storage():
     try:
         # Create database tables
         Base.metadata.create_all(bind=engine)
-        
+
         # Create a test session
         session = SessionLocal()
 

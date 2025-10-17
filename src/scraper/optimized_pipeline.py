@@ -10,13 +10,21 @@ import time
 from typing import Any, Dict, List, Optional
 
 from db import SessionLocal
-from scraper.card_crawler import extract_card_urls, extract_cards, fetch_rendered_html as fetch_card_html
+from scraper.card_crawler import (
+    extract_card_urls,
+    extract_cards,
+    fetch_rendered_html as fetch_card_html,
+)
 from scraper.card_detail_crawler import (
     extract_card_details,
     extract_cert_urls,
     fetch_rendered_html as fetch_card_detail_html,
 )
-from scraper.crawler import extract_categories, extract_category_urls, fetch_rendered_html as fetch_category_html
+from scraper.crawler import (
+    extract_categories,
+    extract_category_urls,
+    fetch_rendered_html as fetch_category_html,
+)
 from scraper.db_helpers import (
     upsert_card,
     upsert_category,
@@ -27,9 +35,17 @@ from scraper.db_helpers import (
     upsert_year,
     upsert_year_total,
 )
-from scraper.set_crawler import extract_set_urls, extract_sets, fetch_rendered_html as fetch_set_html
+from scraper.set_crawler import (
+    extract_set_urls,
+    extract_sets,
+    fetch_rendered_html as fetch_set_html,
+)
 from scraper.url_builder import build_set_page_url
-from scraper.year_crawler import extract_year_urls, extract_years, fetch_rendered_html as fetch_year_html
+from scraper.year_crawler import (
+    extract_year_urls,
+    extract_years,
+    fetch_rendered_html as fetch_year_html,
+)
 
 CATEGORY_URL = "https://my.taggrading.com/pop-report"
 BASE_URL = "https://my.taggrading.com"

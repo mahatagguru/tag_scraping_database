@@ -244,7 +244,7 @@ def test_jsonb_operations():
             # Test querying JSON data
             result = (
                 session.query(AuditLog)
-                .filter(AuditLog.context["test_key"].astext == "test_value")
+                .filter(AuditLog.context["test_key"].as_string() == "test_value")
                 .first()
             )
 
@@ -257,7 +257,7 @@ def test_jsonb_operations():
             # Test JSONB path operations
             result = (
                 session.query(AuditLog)
-                .filter(AuditLog.context["nested"]["level1"].astext == "value1")
+                .filter(AuditLog.context["nested"]["level1"].as_string() == "value1")
                 .first()
             )
 
