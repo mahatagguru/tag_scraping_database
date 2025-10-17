@@ -1,6 +1,7 @@
 """
 Normalization utilities for whitespace, Unicode, case, and canonicalization.
 """
+
 from typing import Optional
 
 

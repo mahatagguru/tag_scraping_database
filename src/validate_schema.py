@@ -673,9 +673,9 @@ class SchemaValidator:
                 "errors": error_checks,
                 "warnings": warning_checks,
                 "info": len(self.validation_results["info"]),
-                "success_rate": (passed_checks / total_checks * 100)
-                if total_checks > 0
-                else 0,
+                "success_rate": (
+                    (passed_checks / total_checks * 100) if total_checks > 0 else 0
+                ),
                 "validation_results": self.validation_results,
             }
 

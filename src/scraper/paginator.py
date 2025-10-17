@@ -1,6 +1,7 @@
 """
 Paginator abstraction for handling numbered pagination and infinite scroll.
 """
+
 from typing import Any, Callable, Generator, Iterator
 
 

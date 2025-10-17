@@ -269,12 +269,16 @@ def optimized_pipeline() -> None:
                             upsert_year_total(
                                 session,
                                 year_id=db_year.id,
-                                num_sets=int(y["num_sets"])
-                                if y["num_sets"].isdigit()
-                                else None,
-                                total_items=int(y["total_items"])
-                                if y["total_items"].isdigit()
-                                else None,
+                                num_sets=(
+                                    int(y["num_sets"])
+                                    if y["num_sets"].isdigit()
+                                    else None
+                                ),
+                                total_items=(
+                                    int(y["total_items"])
+                                    if y["total_items"].isdigit()
+                                    else None
+                                ),
                                 total_graded=total_graded,
                             )
 

@@ -7,7 +7,7 @@ Category (e.g., Baseball) → Year → Set → Card → GradeRows
 
 Features:
 - Dynamic discovery of categories/years/sets/cards/grades
-- Configurable filters and start points  
+- Configurable filters and start points
 - Parallel processing with configurable concurrency
 - Retry logic with backoff and jitter
 - Dry-run mode for testing

@@ -4,7 +4,7 @@ Multi-Level Scraping Orchestrator
 
 Coordinates the complete scraping flow:
 1. Scrape Years index from sport page
-2. For each year, scrape Sets from year page  
+2. For each year, scrape Sets from year page
 3. Handle TOTALS at both levels
 4. Store data in the new database tables
 

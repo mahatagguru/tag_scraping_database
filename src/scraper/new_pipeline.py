@@ -10,7 +10,7 @@ Integrates the complete multi-level scraping system:
 
 Usage:
     python3 new_pipeline.py --sport Baseball
-    python3 new_pipeline.py --sport Hockey  
+    python3 new_pipeline.py --sport Hockey
     python3 new_pipeline.py --all-sports
     python3 new_pipeline.py --sport Baseball --dry-run
 """
