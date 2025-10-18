@@ -6,7 +6,8 @@ Simple performance test script for the async scraping pipeline.
 import asyncio
 import sys
 import time
-from src.scraper.async_pipeline import AsyncScrapingPipeline, AsyncPipelineConfig
+
+from src.scraper.async_pipeline import AsyncPipelineConfig, AsyncScrapingPipeline
 
 
 async def run_pipeline_test(config: AsyncPipelineConfig, test_name: str) -> dict:

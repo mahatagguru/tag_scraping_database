@@ -5,7 +5,8 @@ Example script to run the new high-performance async scraping pipeline.
 
 import asyncio
 import sys
-from src.scraper.async_pipeline import AsyncScrapingPipeline, AsyncPipelineConfig
+
+from src.scraper.async_pipeline import AsyncPipelineConfig, AsyncScrapingPipeline
 
 
 async def main():

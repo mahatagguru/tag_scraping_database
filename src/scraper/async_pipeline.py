@@ -10,7 +10,7 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 from .async_client import AsyncScrapingSession
-from .async_db import AsyncDatabasePool, AsyncBulkOperations, get_async_session
+from .async_db import AsyncBulkOperations, AsyncDatabasePool, get_async_session
 from .async_scraper import AsyncWebScraper
 from .cache_manager import ScrapingCacheManager
 from .monitoring import get_monitoring_manager, profile_function

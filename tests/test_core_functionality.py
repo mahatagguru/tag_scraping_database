@@ -4,9 +4,10 @@ Core functionality tests for the TAG Grading Scraper.
 Tests the essential components after cleanup.
 """
 
-import pytest
-import sys
 from pathlib import Path
+import sys
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -33,7 +34,7 @@ def test_database_import():
 def test_async_pipeline_import():
     """Test that async pipeline can be imported."""
     try:
-        from scraper.async_pipeline import AsyncScrapingPipeline, AsyncPipelineConfig
+        from scraper.async_pipeline import AsyncPipelineConfig, AsyncScrapingPipeline
         assert AsyncScrapingPipeline is not None
         assert AsyncPipelineConfig is not None
     except ImportError as e:
@@ -102,7 +103,7 @@ def test_bulk_operations_import():
 def test_db_helpers_import():
     """Test that database helpers can be imported."""
     try:
-        from scraper.db_helpers import upsert_category, upsert_year, upsert_set
+        from scraper.db_helpers import upsert_category, upsert_set, upsert_year
         assert upsert_category is not None
         assert upsert_year is not None
         assert upsert_set is not None

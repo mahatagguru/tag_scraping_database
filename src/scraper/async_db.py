@@ -4,15 +4,15 @@ Async database connection pool and operations for the scraping pipeline.
 """
 
 import asyncio
-import os
 from contextlib import asynccontextmanager
+import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import asyncpg
 import aiosqlite
+import asyncpg
 from dotenv import load_dotenv
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import Session
 
 # Load environment variables

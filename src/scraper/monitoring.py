@@ -4,16 +4,16 @@ Monitoring and profiling system for the scraping pipeline.
 """
 
 import asyncio
-import json
-import os
-import psutil
-import time
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
+import json
+import os
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 import aiofiles
-from prometheus_client import Counter, Histogram, Gauge, CollectorRegistry, generate_latest
+from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest
+import psutil
 
 
 class PerformanceMetrics:
