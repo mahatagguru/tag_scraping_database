@@ -331,8 +331,8 @@ def test_performance_features():
                     text(
                         f"""
                     SELECT EXISTS (
-                        SELECT 1 FROM pg_indexes 
-                        WHERE indexname = '{index_name}' 
+                        SELECT 1 FROM pg_indexes
+                        WHERE indexname = '{index_name}'
                         AND indexdef LIKE '%USING gin%'
                     );
                 """
@@ -352,8 +352,8 @@ def test_performance_features():
                     text(
                         f"""
                     SELECT EXISTS (
-                        SELECT 1 FROM pg_indexes 
-                        WHERE indexname = '{index_name}' 
+                        SELECT 1 FROM pg_indexes
+                        WHERE indexname = '{index_name}'
                         AND indexdef LIKE '%USING brin%'
                     );
                 """
@@ -373,8 +373,8 @@ def test_performance_features():
                     text(
                         f"""
                     SELECT EXISTS (
-                        SELECT 1 FROM pg_indexes 
-                        WHERE indexname = '{index_name}' 
+                        SELECT 1 FROM pg_indexes
+                        WHERE indexname = '{index_name}'
                         AND indexdef LIKE '%WHERE%'
                     );
                 """

@@ -4,39 +4,40 @@ TAG Grading Scraper - Reporting Website Backend API
 FastAPI-based REST API for comprehensive data reporting and analysis
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Query, Path
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, asc, and_, or_
-from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import logging
-import sys
 import os
+import sys
+from typing import Any, Dict, List, Optional
+
+from fastapi import Depends, FastAPI, HTTPException, Path, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy import and_, asc, desc, func, or_
+from sqlalchemy.orm import Session
 
 # Add src to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from db import get_db_session_context
 from models import (
-    Category,
-    Year,
-    Set,
-    Card,
-    Grade,
-    Snapshot,
-    Population,
     AuditLog,
-    CategoryTotal,
-    YearTotal,
-    SetTotal,
-    PopulationReport,
-    YearsIndex,
-    SetsPerYear,
-    CardsPerSet,
+    Card,
     CardGradeRows,
+    CardsPerSet,
+    Category,
+    CategoryTotal,
+    Grade,
+    Population,
+    PopulationReport,
+    Set,
+    SetsPerYear,
+    SetTotal,
+    Snapshot,
     TotalsRollups,
+    Year,
+    YearsIndex,
+    YearTotal,
 )
 
 # Configure logging
@@ -61,9 +62,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from typing import Optional as Opt
+
 # Pydantic models for API responses
 from pydantic import BaseModel
-from typing import Optional as Opt
 
 
 class CategoryResponse(BaseModel):

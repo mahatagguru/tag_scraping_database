@@ -127,9 +127,9 @@ const Cards: React.FC = () => {
     'all-cards',
     async () => {
       if (!categories) return [];
-      
+
       const allCards: Card[] = [];
-      
+
       // This is a simplified approach - in a real app, you'd want a dedicated endpoint
       for (const category of categories) {
         try {
@@ -140,7 +140,7 @@ const Cards: React.FC = () => {
           console.error(`Error loading cards for category ${category.id}:`, error);
         }
       }
-      
+
       return allCards;
     },
     {
@@ -150,17 +150,17 @@ const Cards: React.FC = () => {
 
   const filteredCards = useMemo(() => {
     if (!allCards) return [];
-    
+
     return allCards.filter((card) => {
-      const matchesSearch = 
+      const matchesSearch =
         card.player?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         card.card_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         card.cert_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         card.set_name.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesCategory = !selectedCategory || card.category_id === selectedCategory;
       const matchesSet = !selectedSet || card.set_id === selectedSet;
-      
+
       return matchesSearch && matchesCategory && matchesSet;
     });
   }, [allCards, searchTerm, selectedCategory, selectedSet]);
@@ -330,7 +330,7 @@ const Cards: React.FC = () => {
               <Typography variant="h5" gutterBottom>
                 {selectedCard.player || 'Unknown Player'}
               </Typography>
-              
+
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Basic Information

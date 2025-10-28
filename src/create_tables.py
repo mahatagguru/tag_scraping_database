@@ -160,9 +160,9 @@ def migrate_create_population_reports() -> None:
                 conn.execute(
                     text(
                         f"""
-                    CREATE TABLE IF NOT EXISTS {partition_name} 
+                    CREATE TABLE IF NOT EXISTS {partition_name}
                     PARTITION OF population_reports
-                    FOR VALUES FROM ('{first_of_month.isoformat()}') 
+                    FOR VALUES FROM ('{first_of_month.isoformat()}')
                     TO ('{next_month.isoformat()}');
                     """
                     )
@@ -204,9 +204,9 @@ def migrate_create_population_report_partitions(months_ahead: int = 12) -> None:
                 conn.execute(
                     text(
                         f"""
-                    CREATE TABLE IF NOT EXISTS {partition_name} 
+                    CREATE TABLE IF NOT EXISTS {partition_name}
                     PARTITION OF population_reports
-                    FOR VALUES FROM ('{first_of_month.isoformat()}') 
+                    FOR VALUES FROM ('{first_of_month.isoformat()}')
                     TO ('{next_month.isoformat()}');
                     """
                     )

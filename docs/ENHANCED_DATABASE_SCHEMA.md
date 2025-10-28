@@ -80,7 +80,7 @@ with audit_context("DATA_PROCESSING", component="processor") as logger:
 ALTER TABLE categories ADD COLUMN description TEXT;
 ALTER TABLE categories ADD COLUMN is_active BOOLEAN DEFAULT TRUE NOT NULL;
 
--- Years table  
+-- Years table
 ALTER TABLE years ADD COLUMN is_active BOOLEAN DEFAULT TRUE NOT NULL;
 
 -- Sets table
@@ -150,19 +150,19 @@ The system now validates that:
 #### Comprehensive Validation Rules
 ```sql
 -- Year format validation (4-digit years)
-ALTER TABLE years_index ADD CONSTRAINT chk_years_index_year_format 
+ALTER TABLE years_index ADD CONSTRAINT chk_years_index_year_format
     CHECK (year ~ '^[0-9]{4}$');
 
 -- Grade format validation (numeric grades with optional decimal)
-ALTER TABLE card_grade_rows ADD CONSTRAINT chk_card_grade_rows_grade_format 
+ALTER TABLE card_grade_rows ADD CONSTRAINT chk_card_grade_rows_grade_format
     CHECK (tag_grade ~ '^[0-9]+(\.[0-9])?$|^[0-9]+$');
 
 -- Positive number constraints
-ALTER TABLE populations ADD CONSTRAINT chk_populations_count 
+ALTER TABLE populations ADD CONSTRAINT chk_populations_count
     CHECK (count >= 0);
 
 -- Logical relationship constraints
-ALTER TABLE populations ADD CONSTRAINT chk_populations_total_graded 
+ALTER TABLE populations ADD CONSTRAINT chk_populations_total_graded
     CHECK (total_graded IS NULL OR total_graded >= count);
 ```
 
@@ -282,21 +282,21 @@ with audit_context("LONG_OPERATION") as logger:
 ### Diagnostic Queries
 ```sql
 -- Check audit log performance
-SELECT level, COUNT(*), AVG(execution_time_ms) 
-FROM audit_logs 
+SELECT level, COUNT(*), AVG(execution_time_ms)
+FROM audit_logs
 WHERE created_at > NOW() - INTERVAL '1 day'
 GROUP BY level;
 
 -- Find slow operations
 SELECT operation, AVG(execution_time_ms) as avg_time, COUNT(*) as count
-FROM audit_logs 
+FROM audit_logs
 WHERE execution_time_ms IS NOT NULL
-GROUP BY operation 
+GROUP BY operation
 ORDER BY avg_time DESC;
 
 -- Check for constraint violations
-SELECT * FROM audit_logs 
-WHERE level = 'ERROR' 
+SELECT * FROM audit_logs
+WHERE level = 'ERROR'
 AND error_message LIKE '%constraint%'
 ORDER BY created_at DESC;
 ```

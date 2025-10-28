@@ -198,7 +198,7 @@ const Search: React.FC = () => {
 
   const filteredResults = useMemo(() => {
     if (!searchResults) return [];
-    
+
     const typeMap = {
       0: 'all',
       1: 'card',
@@ -206,19 +206,19 @@ const Search: React.FC = () => {
       3: 'year',
       4: 'category',
     };
-    
+
     const selectedType = typeMap[tabValue as keyof typeof typeMap];
-    
+
     if (selectedType === 'all') {
       return searchResults;
     }
-    
+
     return searchResults.filter(result => result.type === selectedType);
   }, [searchResults, tabValue]);
 
   const getResultCounts = () => {
     if (!searchResults) return { all: 0, card: 0, set: 0, year: 0, category: 0 };
-    
+
     return searchResults.reduce(
       (counts, result) => {
         counts.all++;

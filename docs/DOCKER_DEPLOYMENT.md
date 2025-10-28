@@ -407,14 +407,14 @@ services:
       - discovery.type=single-node
     ports:
       - "9200:9200"
-  
+
   logstash:
     image: docker.elastic.co/logstash/logstash:7.17.0
     volumes:
       - ./logs:/var/log/tag-scraper
     ports:
       - "5044:5044"
-  
+
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.0
     ports:
@@ -500,7 +500,7 @@ services:
     tmpfs:
       - /tmp
       - /var/run/postgresql
-  
+
   scraper:
     security_opt:
       - no-new-privileges:true

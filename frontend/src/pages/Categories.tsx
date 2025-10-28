@@ -52,7 +52,7 @@ const CategoryCard: React.FC<{
           {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </IconButton>
       </Box>
-      
+
       {category.description && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {category.description}
@@ -356,7 +356,7 @@ const Categories: React.FC = () => {
               onExpand={() => handleCategoryExpand(category.id)}
               isExpanded={expandedCategories.has(category.id)}
             />
-            
+
             {expandedCategories.has(category.id) && (
               <CategoryDetails
                 categoryId={category.id}
@@ -444,7 +444,7 @@ const CategoryDetails: React.FC<{
             onExpand={() => onYearExpand(year.id)}
             isExpanded={expandedYears.has(year.id)}
           />
-          
+
           {expandedYears.has(year.id) && (
             <YearDetails
               yearId={year.id}
@@ -482,7 +482,7 @@ const YearDetails: React.FC<{
             onExpand={() => onSetExpand(set.id)}
             isExpanded={expandedSets.has(set.id)}
           />
-          
+
           {expandedSets.has(set.id) && (
             <SetDetails setId={set.id} onCardClick={onCardClick} />
           )}

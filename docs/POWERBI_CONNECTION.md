@@ -168,7 +168,7 @@ Password = your-password
 let
     Source = PostgreSQL.Database("your-database-host", "tag_grading_db", [
         Query="
-            SELECT 
+            SELECT
                 c.player,
                 c.card_number,
                 s.set_name,
@@ -257,7 +257,7 @@ cards_per_set (1) → (many) card_grade_rows
 #### Key Metrics
 ```sql
 -- Total cards by sport
-SELECT 
+SELECT
     cat.name as sport,
     COUNT(DISTINCT c.id) as total_cards,
     COUNT(DISTINCT s.id) as total_sets,
@@ -281,7 +281,7 @@ ORDER BY total_cards DESC
 #### Key Metrics
 ```sql
 -- Population distribution by grade
-SELECT 
+SELECT
     g.grade_label,
     SUM(p.count) as total_population,
     COUNT(DISTINCT p.card_uid) as unique_cards,
@@ -305,7 +305,7 @@ ORDER BY total_population DESC
 #### Key Metrics
 ```sql
 -- Set performance metrics
-SELECT 
+SELECT
     s.set_name,
     y.year,
     cat.name as sport,
@@ -335,7 +335,7 @@ ORDER BY avg_population DESC
 #### Key Metrics
 ```sql
 -- Player card analysis
-SELECT 
+SELECT
     c.player,
     cat.name as sport,
     COUNT(DISTINCT c.id) as total_cards,
@@ -368,7 +368,7 @@ ORDER BY total_population DESC
 #### Population Trends
 ```sql
 -- Population changes over time
-SELECT 
+SELECT
     DATE_TRUNC('month', s.captured_at) as month,
     cat.name as sport,
     COUNT(DISTINCT p.card_uid) as cards_tracked,
@@ -389,7 +389,7 @@ ORDER BY month, sport
 #### Grade Distribution Analysis
 ```sql
 -- Statistical analysis of grades
-SELECT 
+SELECT
     g.grade_label,
     COUNT(*) as sample_size,
     AVG(p.count) as mean_population,
@@ -411,7 +411,7 @@ ORDER BY mean_population DESC
 ```sql
 -- Simple trend analysis for forecasting
 WITH population_trends AS (
-    SELECT 
+    SELECT
         c.card_uid,
         DATE_TRUNC('month', s.captured_at) as month,
         AVG(p.count) as avg_population,
@@ -421,7 +421,7 @@ WITH population_trends AS (
     JOIN cards c ON p.card_uid = c.card_uid
     GROUP BY c.card_uid, DATE_TRUNC('month', s.captured_at)
 )
-SELECT 
+SELECT
     card_uid,
     month,
     avg_population,

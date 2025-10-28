@@ -24,7 +24,7 @@ JSON_TYPE = JSONB if POSTGRESQL_AVAILABLE else JSON
 BIGINT_TYPE = BIGSERIAL if POSTGRESQL_AVAILABLE else BigInteger
 ```
 
-**Result**: 
+**Result**:
 - When PostgreSQL is available: Uses `JSONB` and `BIGSERIAL`
 - When PostgreSQL is not available: Falls back to `JSON` and `BigInteger`
 
@@ -32,7 +32,7 @@ BIGINT_TYPE = BIGSERIAL if POSTGRESQL_AVAILABLE else BigInteger
 
 **JSONB Support**:
 - `audit_logs.context` - Audit log context data
-- `sets_per_year.set_urls` - Array of set URLs  
+- `sets_per_year.set_urls` - Array of set URLs
 - `sets_per_year.metrics` - Performance metrics
 - `cards_per_set.card_urls` - Array of card URLs
 - `cards_per_set.metrics` - Card-specific metrics

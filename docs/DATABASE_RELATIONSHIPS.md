@@ -12,14 +12,14 @@ erDiagram
         text name UK
         timestamp updated_at
     }
-    
+
     years {
         int id PK
         int category_id FK
         int year
         timestamp updated_at
     }
-    
+
     sets {
         int id PK
         int category_id FK
@@ -29,7 +29,7 @@ erDiagram
         int total_items
         timestamp updated_at
     }
-    
+
     cards {
         int id PK
         text card_uid UK
@@ -45,17 +45,17 @@ erDiagram
         text cert_number
         timestamp updated_at
     }
-    
+
     grades {
         int id PK
         text grade_label UK
     }
-    
+
     snapshots {
         int id PK
         timestamp captured_at UK
     }
-    
+
     populations {
         int snapshot_id PK,FK
         text card_uid PK,FK
@@ -63,7 +63,7 @@ erDiagram
         int count
         int total_graded
     }
-    
+
     %% Multi-Level Scraping Tables
     years_index {
         int id PK
@@ -72,7 +72,7 @@ erDiagram
         text year_url
         timestamp discovered_at
     }
-    
+
     sets_per_year {
         int id PK
         text sport
@@ -83,7 +83,7 @@ erDiagram
         jsonb metrics
         timestamp discovered_at
     }
-    
+
     cards_per_set {
         int id PK
         text sport
@@ -95,7 +95,7 @@ erDiagram
         jsonb metrics
         timestamp discovered_at
     }
-    
+
     card_grade_rows {
         int id PK
         text sport
@@ -114,7 +114,7 @@ erDiagram
         text cert_number
         timestamp discovered_at
     }
-    
+
     %% Rollup and Summary Tables
     totals_rollups {
         int id PK
@@ -126,7 +126,7 @@ erDiagram
         jsonb metrics
         timestamp computed_at
     }
-    
+
     category_totals {
         int id PK
         int category_id FK,UK
@@ -134,7 +134,7 @@ erDiagram
         int total_items
         int total_graded
     }
-    
+
     year_totals {
         int id PK
         int year_id FK,UK
@@ -142,7 +142,7 @@ erDiagram
         int total_items
         int total_graded
     }
-    
+
     set_totals {
         int id PK
         int set_id FK,UK
@@ -150,7 +150,7 @@ erDiagram
         int total_items
         int total_graded
     }
-    
+
     %% Audit and Logging Tables
     audit_logs {
         bigint id PK
@@ -159,7 +159,7 @@ erDiagram
         text message
         timestamp created_at
     }
-    
+
     population_reports {
         bigint id
         text card_uid PK
@@ -170,7 +170,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     %% Core Entity Relationships
     categories ||--o{ years : "has"
     years ||--o{ sets : "contains"
@@ -178,17 +178,17 @@ erDiagram
     cards ||--o{ populations : "has_population"
     grades ||--o{ populations : "applied_to"
     snapshots ||--o{ populations : "captured_in"
-    
+
     %% Multi-Level Scraping Relationships
     years_index ||--o{ sets_per_year : "contains_sets"
     sets_per_year ||--o{ cards_per_set : "contains_cards"
     cards_per_set ||--o{ card_grade_rows : "has_grades"
-    
+
     %% Rollup Relationships
     categories ||--o| category_totals : "summarized_by"
     years ||--o| year_totals : "summarized_by"
     sets ||--o| set_totals : "summarized_by"
-    
+
     %% Foreign Key Constraints
     years }o--|| categories : "belongs_to"
     sets }o--|| categories : "belongs_to"

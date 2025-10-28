@@ -14,17 +14,17 @@ graph TB
     C --> D[Analytics & Reporting]
     D --> E[PowerBI Dashboards]
     D --> F[Claude AI Integration]
-    
+
     G[Scheduling System] --> A
     H[Monitoring & Logging] --> A
     I[Security Layer] --> C
-    
+
     subgraph "Data Sources"
         J[TAG Grading Website]
         K[Population Reports]
         L[Grade Data]
     end
-    
+
     subgraph "Outputs"
         M[Business Intelligence]
         N[Market Analysis]
@@ -158,17 +158,17 @@ The system operates at multiple levels simultaneously:
 for sport in sports:
     # Discover available years
     years = discover_years(sport)
-    
+
     # Level 2: Year Discovery
     for year in years:
         # Discover available sets
         sets = discover_sets(year)
-        
+
         # Level 3: Set Discovery
         for set in sets:
             # Discover available cards
             cards = discover_cards(set)
-            
+
             # Level 4: Card Discovery
             for card in cards:
                 # Discover grade populations

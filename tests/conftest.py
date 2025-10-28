@@ -2,10 +2,11 @@
 Pytest configuration for TAG Grading Scraper tests
 """
 
-import pytest
-import sys
-from pathlib import Path
 import os
+from pathlib import Path
+import sys
+
+import pytest
 
 # Add src directory to Python path for imports
 src_path = Path(__file__).parent.parent / "src"

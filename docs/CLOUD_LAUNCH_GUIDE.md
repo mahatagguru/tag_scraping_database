@@ -457,7 +457,7 @@ services:
           memory: 2G
         reservations:
           memory: 1G
-  
+
   scraper:
     deploy:
       resources:

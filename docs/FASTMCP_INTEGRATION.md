@@ -114,11 +114,11 @@ import asyncio
 async def main():
     client = FastMCPClient("My Client")
     await client.connect("localhost:8000")
-    
+
     # Call a tool
     result = await client.call_tool("get_available_sports", {})
     print(result)
-    
+
     await client.close()
 
 asyncio.run(main())

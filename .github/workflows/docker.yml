@@ -17,14 +17,14 @@ jobs:
   build:
     name: Build and Test Docker Image
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
-      
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-      
+
     - name: Check Docker Hub credentials
       id: check-credentials
       run: |
@@ -33,7 +33,7 @@ jobs:
         else
           echo "has_credentials=false" >> $GITHUB_OUTPUT
         fi
-        
+
     - name: Log in to Docker Hub
       if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true'
       uses: docker/login-action@v3
@@ -41,14 +41,14 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
+
     - name: Skip Docker push (no credentials)
       if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'false'
       run: |
         echo "⚠️ No Docker Hub credentials found. Skipping image push."
         echo "Please set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets to enable Docker Hub integration."
         echo "See DOCKER_HUB_SETUP.md for setup instructions."
-        
+
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
@@ -59,7 +59,7 @@ jobs:
           type=ref,event=pr
           type=semver,pattern={{version}}
           type=sha,prefix={{branch}}-
-          
+
     - name: Build Docker image (simple)
       id: build
       run: |
@@ -67,7 +67,7 @@ jobs:
         docker build -t tag-scraping-tool:local .
         echo "Build completed, checking result..."
         docker images | grep tag-scraping-tool || echo "No tag-scraping-tool images found"
-        
+
     - name: List all images
       run: |
         echo "=== All Docker images ==="
@@ -78,13 +78,13 @@ jobs:
         echo ""
         echo "=== Image details ==="
         docker inspect tag-scraping-tool:local || echo "Image inspection failed"
-        
+
     - name: Test Docker image
       run: |
         # Test the locally built image (always available)
         echo "Testing locally built image..."
         docker run --rm tag-scraping-tool:local python -c "print('Docker image test successful')"
-        
+
     - name: Build and push to registry (if credentials available)
       if: github.event_name != 'pull_request' && steps.check-credentials.outputs.has_credentials == 'true'
       uses: docker/build-push-action@v6
@@ -96,7 +96,7 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        
+
     - name: Upload Docker image as artifact
       if: github.event_name == 'pull_request'
       uses: actions/upload-artifact@v4
@@ -112,11 +112,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name != 'pull_request'
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
-      
+
     - name: Check if image exists in registry
       id: check-image
       run: |
@@ -128,7 +128,7 @@ jobs:
           echo "image_exists=false" >> $GITHUB_OUTPUT
           echo "⚠️ Image not found in registry, skipping security scan"
         fi
-        
+
     - name: Run Trivy vulnerability scanner
       id: trivy
       if: steps.check-image.outputs.image_exists == 'true'
@@ -137,13 +137,13 @@ jobs:
         image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         format: 'sarif'
         output: 'trivy-results.sarif'
-        
+
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
       if: always() && steps.trivy.outcome == 'success'
       with:
         sarif_file: 'trivy-results.sarif'
-        
+
     - name: Run Snyk container scan
       if: steps.check-image.outputs.image_exists == 'true' && env.SNYK_TOKEN != ''
       uses: snyk/actions/docker@master
@@ -160,11 +160,11 @@ jobs:
     needs: [build, security-scan]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     environment: production
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
-      
+
     - name: Deploy to staging
       if: github.ref == 'refs/heads/develop'
       run: |
@@ -173,7 +173,7 @@ jobs:
         # Examples:
         # - kubectl apply -f k8s/staging/
         # - docker-compose -f docker-compose.staging.yml up -d
-        
+
     - name: Deploy to production
       if: github.ref == 'refs/heads/main'
       run: |
@@ -182,7 +182,7 @@ jobs:
         # Examples:
         # - kubectl apply -f k8s/production/
         # - docker-compose -f docker-compose.production.yml up -d
-        
+
     - name: Verify deployment
       run: |
         echo "✅ Docker deployment completed successfully"

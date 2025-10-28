@@ -286,7 +286,7 @@ pip install psycopg2-binary
 
 #### 3. Performance Issues
 **Symptom**: Slow queries despite indexes
-**Solution**: 
+**Solution**:
 - Check if indexes are being used: `EXPLAIN ANALYZE`
 - Verify index statistics are up to date: `ANALYZE table_name`
 - Consider additional indexes based on query patterns

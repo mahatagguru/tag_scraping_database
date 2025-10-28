@@ -139,7 +139,7 @@ def create_basic_tables() -> None:
         # Insert default categories
         cursor.execute(
             """
-            INSERT OR IGNORE INTO categories (name, description) VALUES 
+            INSERT OR IGNORE INTO categories (name, description) VALUES
             ('baseball', 'Baseball cards and memorabilia'),
             ('football', 'Football cards and memorabilia'),
             ('basketball', 'Basketball cards and memorabilia'),
@@ -151,7 +151,7 @@ def create_basic_tables() -> None:
         # Insert default grades
         cursor.execute(
             """
-            INSERT OR IGNORE INTO grades (grade_label, grade_value, description) VALUES 
+            INSERT OR IGNORE INTO grades (grade_label, grade_value, description) VALUES
             ('10.0', 10.0, 'Perfect'),
             ('9.5', 9.5, 'Gem Mint'),
             ('9.0', 9.0, 'Mint'),
