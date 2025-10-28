@@ -11,6 +11,20 @@ import datetime
 import sys
 from typing import Any
 
+# Handle ExceptionGroup for Python < 3.11
+if sys.version_info < (3, 11):
+    try:
+        from exceptiongroup import ExceptionGroup
+    except ImportError:
+        # Fallback: create a simple ExceptionGroup-like class
+        class ExceptionGroup(Exception):
+            def __init__(self, message: str, exceptions: list[Exception]):
+                super().__init__(message)
+                self.exceptions = exceptions
+
+else:
+    ExceptionGroup = BaseExceptionGroup
+
 from .async_db import AsyncBulkOperations, AsyncDatabasePool
 from .async_scraper import AsyncWebScraper
 from .cache_manager import ScrapingCacheManager
@@ -306,11 +320,15 @@ class AsyncScrapingPipeline:
             async with asyncio.TaskGroup() as tg:
                 for url in card_urls:
                     tg.create_task(fetch_card_detail(url))
-        except* Exception as eg:
-            # Log any unhandled exceptions from the task group
+        except ExceptionGroup as eg:
+            # Log any unhandled exceptions from the task group (Python 3.11+)
             for exc in eg.exceptions:
                 print(f"❌ Unhandled task exception: {exc}")
                 self.stats["errors"] += 1
+        except Exception as e:
+            # Fallback for Python < 3.11 or non-ExceptionGroup exceptions
+            print(f"❌ Unhandled task exception: {e}")
+            self.stats["errors"] += 1
 
         print(
             f"✅ Successfully processed {successful_cards}/{len(card_urls)} card details"

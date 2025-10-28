@@ -7,12 +7,27 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import sys
 import time
 from typing import Any
 from urllib.parse import urlparse
 
 import aiohttp
 from selectolax.parser import HTMLParser
+
+# Handle ExceptionGroup for Python < 3.11
+if sys.version_info < (3, 11):
+    try:
+        from exceptiongroup import ExceptionGroup
+    except ImportError:
+        # Fallback: create a simple ExceptionGroup-like class
+        class ExceptionGroup(Exception):
+            def __init__(self, message: str, exceptions: list[Exception]):
+                super().__init__(message)
+                self.exceptions = exceptions
+
+else:
+    ExceptionGroup = BaseExceptionGroup
 
 
 class AsyncHTTPClient:
@@ -181,10 +196,13 @@ class AsyncHTTPClient:
             async with asyncio.TaskGroup() as tg:
                 for url in urls:
                     tg.create_task(fetch_with_semaphore(url))
-        except* Exception as eg:
-            # Handle any exceptions from the task group
+        except ExceptionGroup as eg:
+            # Handle any exceptions from the task group (Python 3.11+)
             for exc in eg.exceptions:
                 print(f"Task exception: {exc}")
+        except Exception as e:
+            # Fallback for Python < 3.11 or non-ExceptionGroup exceptions
+            print(f"Task exception: {e}")
 
         # Return results in input order
         return [(url, result_dict.get(url)) for url in urls]

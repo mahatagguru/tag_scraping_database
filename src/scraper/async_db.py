@@ -8,7 +8,22 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 import os
+import sys
 from typing import Any
+
+# Handle ExceptionGroup for Python < 3.11
+if sys.version_info < (3, 11):
+    try:
+        from exceptiongroup import ExceptionGroup
+    except ImportError:
+        # Fallback: create a simple ExceptionGroup-like class
+        class ExceptionGroup(Exception):
+            def __init__(self, message: str, exceptions: list[Exception]):
+                super().__init__(message)
+                self.exceptions = exceptions
+
+else:
+    ExceptionGroup = BaseExceptionGroup
 
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -226,10 +241,13 @@ class AsyncBulkOperations:
                 async with asyncio.TaskGroup() as tg:
                     for batch in batches:
                         tg.create_task(process_batch(batch))
-            except* Exception as eg:
-                # Log exceptions but don't fail completely
+            except ExceptionGroup as eg:
+                # Log exceptions but don't fail completely (Python 3.11+)
                 for exc in eg.exceptions:
                     print(f"⚠️  Batch processing error: {exc}")
+            except Exception as e:
+                # Fallback for Python < 3.11 or non-ExceptionGroup exceptions
+                print(f"⚠️  Batch processing error: {e}")
 
     async def bulk_upsert_categories(self, categories: list[dict[str, Any]]) -> None:
         """Bulk upsert categories."""
