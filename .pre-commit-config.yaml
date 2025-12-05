@@ -2,27 +2,22 @@
 # This ensures consistent code quality and formatting across all commits
 
 repos:
-  # Black - Python code formatting (core files only)
+  # Ruff - Fast Python linter and formatter (replaces flake8, isort, pylint)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^(src/|tests/|run_async_pipeline\.py|test_performance\.py)
+      - id: ruff-format
+        files: ^(src/|tests/|run_async_pipeline\.py|test_performance\.py)
+
+  # Black - Python code formatting (keeping for compatibility)
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
-        args: [--line-length=88, --target-version=py312]
-        files: ^(src/scraper/|run_async_pipeline\.py|test_performance\.py)$
-
-  # isort - Import sorting (core files only)
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: [--profile=black, --line-length=88]
-        files: ^(src/scraper/|run_async_pipeline\.py|test_performance\.py)$
-
-  # flake8 - Linting (core files only)
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
-    hooks:
-      - id: flake8
+        args: [--line-length=88]
         files: ^(src/scraper/|run_async_pipeline\.py|test_performance\.py)$
 
   # General file checks
