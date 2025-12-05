@@ -853,7 +853,7 @@ def migrate_postgresql_optimizations():
                     conn.execute(
                         text(
                             f"CREATE INDEX IF NOT EXISTS {index_name} ON {table} ("
-                            f'{index_name.split("_")[1]}) WHERE {condition};'
+                            f"{index_name.split('_')[1]}) WHERE {condition};"
                         )
                     )
                     logger.info(f"Added partial index: {index_name}")

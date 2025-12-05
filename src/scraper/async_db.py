@@ -380,7 +380,7 @@ class AsyncBulkOperations:
 
         # Build final query
         query = f"""
-        INSERT INTO {table_name} ({', '.join(columns)})
+        INSERT INTO {table_name} ({", ".join(columns)})
         VALUES {values_clauses}
         {conflict_clause}
         """
@@ -411,8 +411,8 @@ class AsyncBulkOperations:
 
         # Build query
         query = f"""
-        INSERT OR REPLACE INTO {table_name} ({', '.join(columns)})
-        VALUES ({', '.join(placeholders)})
+        INSERT OR REPLACE INTO {table_name} ({", ".join(columns)})
+        VALUES ({", ".join(placeholders)})
         """
 
         # Execute bulk insert
