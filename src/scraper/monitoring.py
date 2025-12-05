@@ -13,8 +13,8 @@ import time
 from typing import Any
 
 import aiofiles
-import psutil
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest
+import psutil
 
 
 class PerformanceMetrics:
