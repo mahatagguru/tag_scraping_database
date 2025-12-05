@@ -6,6 +6,8 @@ This document summarizes the comprehensive cleanup performed on the TAG Grading 
 
 The repository had grown to contain multiple duplicate implementations of the same functionality, leading to confusion, maintenance overhead, and failing CI checks. This cleanup consolidates everything into a single, high-performance async implementation.
 
+**Note**: Additional cleanup removed the MCP (Model Context Protocol) server integration, which was not actively being used and had broken dependencies on removed modules.
+
 ## 📁 Files Removed
 
 ### Old Pipeline Implementations
@@ -70,7 +72,6 @@ The repository had grown to contain multiple duplicate implementations of the sa
 ### Essential Tests
 - `tests/test_core_functionality.py` - Core functionality tests
 - `tests/test_db_helpers.py` - Database helper tests
-- `tests/test_mcp.py` - MCP server tests
 - `tests/test_models.py` - Database model tests
 - `tests/test_postgresql_detection.py` - PostgreSQL detection tests
 - `tests/test_postgresql.py` - PostgreSQL-specific tests

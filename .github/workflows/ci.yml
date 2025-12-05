@@ -226,13 +226,21 @@ jobs:
             ;;
         esac
 
-    - name: Upload security reports
+    - name: Upload safety report
+      if: matrix.tool == 'safety'
       uses: actions/upload-artifact@v4
       with:
-        name: security-reports
-        path: |
-          safety-report.json
-          bandit-report.json
+        name: security-report-safety-${{ github.run_id }}-${{ github.run_attempt }}
+        path: safety-report.json
+        if-no-files-found: warn
+
+    - name: Upload bandit report
+      if: matrix.tool == 'bandit'
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-report-bandit-${{ github.run_id }}-${{ github.run_attempt }}
+        path: bandit-report.json
+        if-no-files-found: warn
 
   # Build and package
   build:
@@ -261,7 +269,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: build-package
+        name: build-package-${{ github.run_id }}-${{ github.run_attempt }}
         path: dist/
 
   # Quality gates

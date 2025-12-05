@@ -312,10 +312,11 @@ The CD pipeline deploys automatically:
 
 ## 📚 Documentation
 
-- [Database Schema Documentation](Documentation/DATABASE_SCHEMA_ENHANCED.md)
-- [PostgreSQL Enhancements](Documentation/POSTGRESQL_ENHANCEMENTS.md)
-- [Implementation Summary](Documentation/POSTGRESQL_IMPLEMENTATION_SUMMARY.md)
-- [API Documentation](Documentation/API.md) (if applicable)
+- [Enhanced Database Schema](docs/ENHANCED_DATABASE_SCHEMA.md)
+- [PostgreSQL Enhancements](docs/POSTGRESQL_ENHANCEMENTS.md)
+- [Database Relationships](docs/DATABASE_RELATIONSHIPS.md)
+- [Docker Deployment](docs/DOCKER_DEPLOYMENT.md)
+- [Project Overview](docs/PROJECT_OVERVIEW.md)
 
 ## 🤝 Contributing
 

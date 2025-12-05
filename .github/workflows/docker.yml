@@ -101,7 +101,8 @@ jobs:
       if: github.event_name == 'pull_request'
       uses: actions/upload-artifact@v4
       with:
-        name: docker-image
+        # Use a unique name per run/attempt to avoid conflicts on reruns
+        name: docker-image-${{ github.run_id }}-${{ github.run_attempt }}
         path: |
           .dockerignore
           Dockerfile

@@ -85,6 +85,10 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# Security reports
+safety-report.json
+bandit-report.json
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -125,3 +129,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Website/Dashboard (removed)
+backend/
+frontend/

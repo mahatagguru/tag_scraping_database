@@ -3,10 +3,6 @@ sqlalchemy>=2.0.0,<3.0.0
 psycopg2-binary>=2.9.0,<3.0.0
 python-dotenv>=1.0.0,<2.0.0
 
-# Web framework (if needed)
-fastapi>=0.100.0,<1.0.0
-uvicorn[standard]>=0.20.0,<1.0.0
-
 # Database utilities
 alembic>=1.11.0,<2.0.0
 
@@ -57,9 +53,6 @@ aiohttp>=3.9.0,<4.0.0
 aiosqlite>=0.19.0,<1.0.0
 asyncpg>=0.29.0,<1.0.0
 exceptiongroup>=1.1.0; python_version < "3.11"  # Required for Python < 3.11 exception group support
-
-# FastMCP Integration (install from GitHub)
-# pip install git+https://github.com/jlowin/fastmcp.git
 
 # Build and packaging
 build>=0.10.0,<1.0.0
