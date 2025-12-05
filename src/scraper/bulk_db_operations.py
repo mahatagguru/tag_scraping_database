@@ -4,6 +4,7 @@ Bulk database operations for efficient batch processing.
 """
 
 import datetime
+from collections.abc import Callable
 from typing import Any, Optional
 
 from sqlalchemy import text
@@ -404,7 +405,7 @@ class BulkDatabaseOperations:
     async def process_batches(
         self,
         items: list[Any],
-        process_func: callable,
+        process_func: Callable[..., Any],
         session: Optional[AsyncSession] = None,
     ) -> list[Any]:
         """Process items in batches using the specified function."""

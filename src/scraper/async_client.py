@@ -21,7 +21,7 @@ if sys.version_info < (3, 11):
         from exceptiongroup import ExceptionGroup
     except ImportError:
         # Fallback: create a simple ExceptionGroup-like class
-        class ExceptionGroup(Exception):
+        class ExceptionGroup(Exception):  # type: ignore[no-redef]
             def __init__(self, message: str, exceptions: list[Exception]):
                 super().__init__(message)
                 self.exceptions = exceptions
@@ -31,7 +31,7 @@ if sys.version_info < (3, 11):
 else:
     from builtins import BaseExceptionGroup
 
-    ExceptionGroup = BaseExceptionGroup
+    ExceptionGroup = BaseExceptionGroup  # type: ignore[no-redef,misc]
 
 
 class AsyncHTTPClient:
