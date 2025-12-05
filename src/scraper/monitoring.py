@@ -13,7 +13,13 @@ import time
 from typing import Any
 
 import aiofiles
-from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest
+from prometheus_client import (
+    CollectorRegistry,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 import psutil
 
 

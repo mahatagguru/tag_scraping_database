@@ -25,10 +25,12 @@ if sys.version_info < (3, 11):
             def __init__(self, message: str, exceptions: list[Exception]):
                 super().__init__(message)
                 self.exceptions = exceptions
+
     # Provide a BaseExceptionGroup-compatible name for older runtimes
     BaseExceptionGroup = ExceptionGroup
 else:
     from builtins import BaseExceptionGroup
+
     ExceptionGroup = BaseExceptionGroup
 
 
