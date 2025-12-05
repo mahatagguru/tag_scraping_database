@@ -168,7 +168,7 @@ class AsyncHTTPClient:
                 return content
 
         except aiohttp.ClientError as e:
-            raise RuntimeError(f"Failed to fetch {url}: {e}")
+            raise RuntimeError(f"Failed to fetch {url}: {e}") from e
 
     async def fetch_multiple(
         self, urls: list[str], max_concurrent: int = 10

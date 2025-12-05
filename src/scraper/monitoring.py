@@ -6,13 +6,15 @@ Monitoring and profiling system for the scraping pipeline.
 from __future__ import annotations
 
 import asyncio
-from collections import defaultdict, deque
-from datetime import datetime, timedelta
+import contextlib
 import json
 import time
+from collections import defaultdict, deque
+from datetime import datetime, timedelta
 from typing import Any
 
 import aiofiles
+import psutil
 from prometheus_client import (
     CollectorRegistry,
     Counter,
@@ -20,7 +22,6 @@ from prometheus_client import (
     Histogram,
     generate_latest,
 )
-import psutil
 
 
 class PerformanceMetrics:
@@ -225,10 +226,8 @@ class PerformanceMetrics:
         """Cleanup monitoring resources."""
         if self._monitoring_task and not self._monitoring_task.done():
             self._monitoring_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._monitoring_task
-            except asyncio.CancelledError:
-                pass
 
 
 class Profiler:

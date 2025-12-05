@@ -5,9 +5,7 @@ This module provides structured logging with error handling, context tracking,
 performance monitoring, and database persistence for audit logs.
 """
 
-from contextlib import contextmanager
-from datetime import datetime, timezone
-from functools import wraps
+import atexit
 import inspect
 import json
 import logging
@@ -15,7 +13,10 @@ import os
 import sys
 import time
 import traceback
-from typing import Any, Dict, Optional
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from functools import wraps
+from typing import Any, Optional
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -228,7 +229,7 @@ class AuditLogger:
         message: str,
         error: Exception,
         operation: str = None,
-        context: Dict[str, Any] = None,
+        context: dict[str, Any] = None,
     ):
         """Log error with comprehensive context and operation details."""
         error_context = {
@@ -261,7 +262,7 @@ def get_audit_logger(component: str = None) -> AuditLogger:
     return _global_audit_logger
 
 
-def log_audit(level: str, message: str, context: Dict[str, Any] = None, **kwargs):
+def log_audit(level: str, message: str, context: dict[str, Any] = None, **kwargs):
     """Legacy function for backward compatibility."""
     audit_logger = get_audit_logger()
     return audit_logger.log(level, message, context=context, **kwargs)
@@ -466,6 +467,4 @@ def cleanup_audit_logging():
 
 
 # Register cleanup on module unload
-import atexit
-
 atexit.register(cleanup_audit_logging)

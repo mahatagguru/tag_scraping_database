@@ -1,10 +1,9 @@
 import datetime
 import logging
 
+from db import Base, engine  # ensures engine and Base are loaded
 from dotenv import load_dotenv
 from sqlalchemy import text
-
-from db import Base, engine  # ensures engine and Base are loaded
 
 load_dotenv()
 
@@ -669,7 +668,7 @@ def migrate_add_check_constraints():
 
 def migrate_add_cascade_deletes():
     """Update foreign key constraints to include CASCADE DELETE."""
-    with engine.connect() as conn:
+    with engine.connect():
         try:
             # Note: PostgreSQL doesn't support ALTER TABLE to change foreign key constraints
             # This would require recreating the tables, which is complex

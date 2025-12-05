@@ -148,10 +148,10 @@ class AsyncWebScraper:
         """
         try:
             from playwright.async_api import async_playwright
-        except ImportError:
+        except ImportError as e:
             raise RuntimeError(
                 "Playwright is not installed. Please run: pip install playwright && python3 -m playwright install"
-            )
+            ) from e
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)

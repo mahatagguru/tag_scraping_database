@@ -6,9 +6,9 @@ Async database connection pool and operations for the scraping pipeline.
 from __future__ import annotations
 
 import asyncio
-from contextlib import asynccontextmanager
 import os
 import sys
+from contextlib import asynccontextmanager
 from typing import Any
 
 # Handle ExceptionGroup for Python < 3.11
@@ -225,16 +225,15 @@ class AsyncBulkOperations:
         semaphore = asyncio.Semaphore(self.max_concurrent_batches)
 
         async def process_batch(batch: list[dict[str, Any]]) -> None:
-            async with semaphore:
-                async with self.db_pool.get_session() as session:
-                    if self.db_pool.is_postgres:
-                        await self._bulk_upsert_postgres(
-                            session, table_name, batch, unique_keys
-                        )
-                    else:
-                        await self._bulk_upsert_sqlite(
-                            session, table_name, batch, unique_keys
-                        )
+            async with semaphore, self.db_pool.get_session() as session:
+                if self.db_pool.is_postgres:
+                    await self._bulk_upsert_postgres(
+                        session, table_name, batch, unique_keys
+                    )
+                else:
+                    await self._bulk_upsert_sqlite(
+                        session, table_name, batch, unique_keys
+                    )
 
         # Process batches concurrently using TaskGroup
         if len(batches) == 1:

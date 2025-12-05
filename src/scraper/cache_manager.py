@@ -176,9 +176,7 @@ class CacheManager:
     async def clear_category(self, category: str) -> None:
         """Clear all cache entries for a category."""
         # Clear memory cache
-        keys_to_remove = [
-            k for k in self._memory_cache.keys() if k.startswith(f"{category}:")
-        ]
+        keys_to_remove = [k for k in self._memory_cache if k.startswith(f"{category}:")]
         for key in keys_to_remove:
             del self._memory_cache[key]
 
@@ -188,7 +186,7 @@ class CacheManager:
                 try:
                     file_path = os.path.join(self.cache_dir, filename)
                     async with aiofiles.open(file_path, "rb") as f:
-                        cache_data = pickle.loads(await f.read())
+                        pickle.loads(await f.read())
 
                     # Check if this file belongs to the category
                     # We'd need to store category info in the cache data for this to work properly

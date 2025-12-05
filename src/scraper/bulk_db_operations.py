@@ -3,9 +3,8 @@
 Bulk database operations for efficient batch processing.
 """
 
-import asyncio
 import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,8 +20,8 @@ class BulkDatabaseOperations:
         self.batch_size = batch_size
 
     async def bulk_upsert_categories(
-        self, categories: List[Dict[str, Any]], session: Optional[AsyncSession] = None
-    ) -> List[int]:
+        self, categories: list[dict[str, Any]], session: Optional[AsyncSession] = None
+    ) -> list[int]:
         """Bulk upsert categories and return their IDs."""
         if not categories:
             return []
@@ -34,8 +33,8 @@ class BulkDatabaseOperations:
             return await self._bulk_upsert_categories_impl(categories, session)
 
     async def _bulk_upsert_categories_impl(
-        self, categories: List[Dict[str, Any]], session: AsyncSession
-    ) -> List[int]:
+        self, categories: list[dict[str, Any]], session: AsyncSession
+    ) -> list[int]:
         """Implementation of bulk category upsert."""
         now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -88,8 +87,8 @@ class BulkDatabaseOperations:
             return ids
 
     async def bulk_upsert_years(
-        self, years: List[Dict[str, Any]], session: Optional[AsyncSession] = None
-    ) -> List[int]:
+        self, years: list[dict[str, Any]], session: Optional[AsyncSession] = None
+    ) -> list[int]:
         """Bulk upsert years and return their IDs."""
         if not years:
             return []
@@ -101,8 +100,8 @@ class BulkDatabaseOperations:
             return await self._bulk_upsert_years_impl(years, session)
 
     async def _bulk_upsert_years_impl(
-        self, years: List[Dict[str, Any]], session: AsyncSession
-    ) -> List[int]:
+        self, years: list[dict[str, Any]], session: AsyncSession
+    ) -> list[int]:
         """Implementation of bulk year upsert."""
         now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -156,8 +155,8 @@ class BulkDatabaseOperations:
             return ids
 
     async def bulk_upsert_sets(
-        self, sets: List[Dict[str, Any]], session: Optional[AsyncSession] = None
-    ) -> List[int]:
+        self, sets: list[dict[str, Any]], session: Optional[AsyncSession] = None
+    ) -> list[int]:
         """Bulk upsert sets and return their IDs."""
         if not sets:
             return []
@@ -169,8 +168,8 @@ class BulkDatabaseOperations:
             return await self._bulk_upsert_sets_impl(sets, session)
 
     async def _bulk_upsert_sets_impl(
-        self, sets: List[Dict[str, Any]], session: AsyncSession
-    ) -> List[int]:
+        self, sets: list[dict[str, Any]], session: AsyncSession
+    ) -> list[int]:
         """Implementation of bulk set upsert."""
         now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -229,8 +228,8 @@ class BulkDatabaseOperations:
             return ids
 
     async def bulk_upsert_cards(
-        self, cards: List[Dict[str, Any]], session: Optional[AsyncSession] = None
-    ) -> List[int]:
+        self, cards: list[dict[str, Any]], session: Optional[AsyncSession] = None
+    ) -> list[int]:
         """Bulk upsert cards and return their IDs."""
         if not cards:
             return []
@@ -242,8 +241,8 @@ class BulkDatabaseOperations:
             return await self._bulk_upsert_cards_impl(cards, session)
 
     async def _bulk_upsert_cards_impl(
-        self, cards: List[Dict[str, Any]], session: AsyncSession
-    ) -> List[int]:
+        self, cards: list[dict[str, Any]], session: AsyncSession
+    ) -> list[int]:
         """Implementation of bulk card upsert."""
         now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -321,8 +320,8 @@ class BulkDatabaseOperations:
             return ids
 
     async def bulk_upsert_population_reports(
-        self, reports: List[Dict[str, Any]], session: Optional[AsyncSession] = None
-    ) -> List[int]:
+        self, reports: list[dict[str, Any]], session: Optional[AsyncSession] = None
+    ) -> list[int]:
         """Bulk upsert population reports and return their IDs."""
         if not reports:
             return []
@@ -334,8 +333,8 @@ class BulkDatabaseOperations:
             return await self._bulk_upsert_population_reports_impl(reports, session)
 
     async def _bulk_upsert_population_reports_impl(
-        self, reports: List[Dict[str, Any]], session: AsyncSession
-    ) -> List[int]:
+        self, reports: list[dict[str, Any]], session: AsyncSession
+    ) -> list[int]:
         """Implementation of bulk population report upsert."""
         now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -404,10 +403,10 @@ class BulkDatabaseOperations:
 
     async def process_batches(
         self,
-        items: List[Any],
+        items: list[Any],
         process_func: callable,
         session: Optional[AsyncSession] = None,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """Process items in batches using the specified function."""
         results = []
 

@@ -1,6 +1,6 @@
-from contextlib import contextmanager
 import os
-from typing import Generator, Iterator
+from collections.abc import Generator, Iterator
+from contextlib import contextmanager
 
 from dotenv import load_dotenv
 from sqlalchemy import Engine, create_engine, text

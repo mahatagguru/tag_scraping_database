@@ -6,22 +6,18 @@ checking relationships, constraints, and identifying logical inconsistencies.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
-
-from sqlalchemy import inspect, text
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from contextlib import contextmanager
+from typing import Any, Optional
 
 from db import SessionLocal, engine
-from models import Base
+from sqlalchemy import inspect, text
+from sqlalchemy.exc import SQLAlchemyError
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-from contextlib import contextmanager
 
 
 @contextmanager
@@ -39,7 +35,7 @@ class SchemaValidator:
 
     def __init__(self) -> None:
         self.inspector = inspect(engine)
-        self.validation_results: Dict[str, List[Any]] = {
+        self.validation_results: dict[str, list[Any]] = {
             "errors": [],
             "warnings": [],
             "info": [],
@@ -47,7 +43,7 @@ class SchemaValidator:
         }
 
     def _add_result(
-        self, result_type: str, message: str, details: Optional[Dict[str, Any]] = None
+        self, result_type: str, message: str, details: Optional[dict[str, Any]] = None
     ) -> None:
         """Add a validation result."""
         result = {
@@ -644,7 +640,7 @@ class SchemaValidator:
             self._add_result("passed", "Audit logging table has all required columns")
             return True
 
-    def run_validation(self) -> Dict[str, Any]:
+    def run_validation(self) -> dict[str, Any]:
         """Run all validation checks."""
         logger.info("Starting comprehensive schema validation...")
 
@@ -699,7 +695,7 @@ class SchemaValidator:
             logger.error(f"Validation failed: {e}")
             raise
 
-    def print_validation_report(self, summary: Dict[str, Any]) -> None:
+    def print_validation_report(self, summary: dict[str, Any]) -> None:
         """Print a formatted validation report."""
         print("\n" + "=" * 80)
         print("DATABASE SCHEMA VALIDATION REPORT")
