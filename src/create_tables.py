@@ -1,9 +1,10 @@
 import datetime
 import logging
 
-from db import Base, engine  # ensures engine and Base are loaded
 from dotenv import load_dotenv
 from sqlalchemy import text
+
+from db import Base, engine  # ensures engine and Base are loaded
 
 load_dotenv()
 

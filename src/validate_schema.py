@@ -9,9 +9,10 @@ import logging
 from contextlib import contextmanager
 from typing import Any, Optional
 
-from db import SessionLocal, engine
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
+
+from db import SessionLocal, engine
 
 # Configure logging
 logging.basicConfig(
