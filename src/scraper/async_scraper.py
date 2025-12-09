@@ -44,7 +44,8 @@ class AsyncWebScraper:
     async def __aenter__(self):
         """Async context manager entry."""
         self.session = AsyncScrapingSession(
-            max_concurrent=self.max_concurrent,
+            max_connections=self.max_concurrent,
+            max_connections_per_host=self.max_concurrent,
             rate_limit=self.rate_limit,
             enable_cache=self.enable_cache,
         )
