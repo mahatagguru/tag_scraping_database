@@ -8,28 +8,14 @@ from __future__ import annotations
 import argparse
 import asyncio
 import datetime
+import logging
 import sys
 from typing import Any
 
-# Handle ExceptionGroup for Python < 3.11
-if sys.version_info < (3, 11):
-    try:
-        from exceptiongroup import ExceptionGroup
-    except ImportError:
-        # Fallback: create a simple ExceptionGroup-like class
-        class ExceptionGroup(Exception):  # type: ignore[no-redef]
-            def __init__(self, message: str, exceptions: list[Exception]):
-                super().__init__(message)
-                self.exceptions = exceptions
-
-    # Provide a BaseExceptionGroup-compatible name for older runtimes
-    BaseExceptionGroup = ExceptionGroup
-else:
-    from builtins import BaseExceptionGroup
-
-    ExceptionGroup = BaseExceptionGroup  # type: ignore[no-redef,misc]
-
 from .async_db import AsyncBulkOperations, AsyncDatabasePool
+from .compat import BaseExceptionGroup, ExceptionGroup
+
+logger = logging.getLogger(__name__)
 from .async_scraper import AsyncWebScraper
 from .cache_manager import ScrapingCacheManager
 from .monitoring import get_monitoring_manager, profile_function
@@ -105,7 +91,7 @@ class AsyncScrapingPipeline:
     @profile_function("pipeline_initialize")
     async def initialize(self) -> None:
         """Initialize the pipeline components."""
-        print("🚀 Initializing async scraping pipeline...")
+        logger.info("Initializing async scraping pipeline...")
 
         # Initialize database pool
         self.db_pool = AsyncDatabasePool(
@@ -132,12 +118,12 @@ class AsyncScrapingPipeline:
 
             self.cache = get_scraping_cache()
 
-        print("✅ Pipeline initialization complete")
+        logger.info("Pipeline initialization complete")
 
     @profile_function("pipeline_cleanup")
     async def cleanup(self) -> None:
         """Cleanup pipeline resources."""
-        print("🧹 Cleaning up pipeline resources...")
+        logger.info("Cleaning up pipeline resources...")
 
         if self.scraper:
             await self.scraper.__aexit__(None, None, None)
@@ -157,13 +143,13 @@ class AsyncScrapingPipeline:
         self, base_url: str = "https://my.taggrading.com/pop-report"
     ) -> list[dict[str, Any]]:
         """Scrape categories from the main page."""
-        print("📂 Scraping categories...")
+        logger.info("Scraping categories...")
 
         # Check cache first
         if self.cache:
             cached_categories = await self.cache.get_categories("all")
             if cached_categories:
-                print(f"✅ Found {len(cached_categories)} cached categories")
+                logger.info("Found %d cached categories", len(cached_categories))
                 return cached_categories
 
         # Scrape categories
@@ -173,19 +159,19 @@ class AsyncScrapingPipeline:
         if self.cache and categories:
             await self.cache.set_categories("all", categories)
 
-        print(f"✅ Scraped {len(categories)} categories")
+        logger.info("Scraped %d categories", len(categories))
         return categories
 
     @profile_function("scrape_years")
     async def scrape_years(self, sport: str) -> list[dict[str, Any]]:
         """Scrape years for a sport."""
-        print(f"📅 Scraping years for {sport}...")
+        logger.info("Scraping years for %s...", sport)
 
         # Check cache first
         if self.cache:
             cached_years = await self.cache.get_years(sport)
             if cached_years:
-                print(f"✅ Found {len(cached_years)} cached years for {sport}")
+                logger.info("Found %d cached years for %s", len(cached_years), sport)
                 return cached_years
 
         # Scrape years
@@ -200,19 +186,19 @@ class AsyncScrapingPipeline:
         if self.cache and years:
             await self.cache.set_years(sport, years)
 
-        print(f"✅ Scraped {len(years)} years for {sport}")
+        logger.info("Scraped %d years for %s", len(years), sport)
         return years
 
     @profile_function("scrape_sets")
     async def scrape_sets(self, sport: str, year: str) -> list[dict[str, Any]]:
         """Scrape sets for a sport/year."""
-        print(f"📦 Scraping sets for {sport} {year}...")
+        logger.info("Scraping sets for %s %s...", sport, year)
 
         # Check cache first
         if self.cache:
             cached_sets = await self.cache.get_sets(sport, year)
             if cached_sets:
-                print(f"✅ Found {len(cached_sets)} cached sets for {sport} {year}")
+                logger.info("Found %d cached sets for %s %s", len(cached_sets), sport, year)
                 return cached_sets
 
         # Scrape sets
@@ -227,7 +213,7 @@ class AsyncScrapingPipeline:
         if self.cache and sets:
             await self.cache.set_sets(sport, year, sets)
 
-        print(f"✅ Scraped {len(sets)} sets for {sport} {year}")
+        logger.info("Scraped %d sets for %s %s", len(sets), sport, year)
         return sets
 
     @profile_function("scrape_cards")
@@ -235,14 +221,15 @@ class AsyncScrapingPipeline:
         self, sport: str, year: str, set_name: str
     ) -> list[dict[str, Any]]:
         """Scrape cards for a sport/year/set."""
-        print(f"🃏 Scraping cards for {sport} {year} {set_name}...")
+        logger.info("Scraping cards for %s %s %s...", sport, year, set_name)
 
         # Check cache first
         if self.cache:
             cached_cards = await self.cache.get_cards(sport, year, set_name)
             if cached_cards:
-                print(
-                    f"✅ Found {len(cached_cards)} cached cards for {sport} {year} {set_name}"
+                logger.info(
+                    "Found %d cached cards for %s %s %s",
+                    len(cached_cards), sport, year, set_name,
                 )
                 return cached_cards
 
@@ -258,7 +245,7 @@ class AsyncScrapingPipeline:
         if self.cache and cards:
             await self.cache.set_cards(sport, year, set_name, cards)
 
-        print(f"✅ Scraped {len(cards)} cards for {sport} {year} {set_name}")
+        logger.info("Scraped %d cards for %s %s %s", len(cards), sport, year, set_name)
         return cards
 
     @profile_function("scrape_card_details")
@@ -294,7 +281,7 @@ class AsyncScrapingPipeline:
             return
 
         # Fetch card details concurrently
-        print(f"🔄 Processing {len(card_urls)} card details concurrently...")
+        logger.info("Processing %d card details concurrently...", len(card_urls))
 
         # Use semaphore to limit concurrent requests
         semaphore = asyncio.Semaphore(self.config.max_concurrent_requests)
@@ -311,7 +298,7 @@ class AsyncScrapingPipeline:
                         successful_cards += 1
                         self.stats["cards_processed"] += 1
                 except Exception as e:
-                    print(f"❌ Error fetching card details for {url}: {e}")
+                    logger.error("Error fetching card details for %s: %s", url, e)
                     if self.monitoring:
                         self.monitoring.metrics.record_scraping_error(
                             str(type(e).__name__), "card_details"
@@ -327,26 +314,56 @@ class AsyncScrapingPipeline:
         except ExceptionGroup as eg:
             # Log any unhandled exceptions from the task group (Python 3.11+)
             for exc in eg.exceptions:
-                print(f"❌ Unhandled task exception: {exc}")
+                logger.error("Unhandled task exception: %s", exc)
                 self.stats["errors"] += 1
         except Exception as e:
             # Fallback for Python < 3.11 or non-ExceptionGroup exceptions
-            print(f"❌ Unhandled task exception: {e}")
+            logger.error("Unhandled task exception: %s", e)
             self.stats["errors"] += 1
 
-        print(
-            f"✅ Successfully processed {successful_cards}/{len(card_urls)} card details"
+        logger.info(
+            "Successfully processed %d/%d card details",
+            successful_cards, len(card_urls),
         )
 
     @profile_function("run_pipeline")
     async def run_pipeline(self, sports: list[str] | None = None) -> dict[str, Any]:
         """Run the complete scraping pipeline."""
         self.stats["start_time"] = datetime.datetime.now()
-        print(f"🚀 Starting async scraping pipeline at {self.stats['start_time']}")
-        print(
-            f"Configuration: {self.config.max_concurrent_requests} concurrent requests, "
-            f"{self.config.rate_limit}s rate limit, batch size {self.config.batch_size}"
+        logger.info("Starting async scraping pipeline at %s", self.stats["start_time"])
+        logger.info(
+            "Configuration: %d concurrent requests, %.1fs rate limit, batch size %d",
+            self.config.max_concurrent_requests,
+            self.config.rate_limit,
+            self.config.batch_size,
         )
+
+        # Lock protecting shared stats counters accessed from concurrent coroutines
+        stats_lock = asyncio.Lock()
+
+        async def process_set(sport: str, year: str, set_data: dict[str, Any]) -> None:
+            set_name = set_data["set_name"]
+            if set_name.upper() == "TOTALS":
+                return
+            logger.info("Processing set: %s %s %s", sport, year, set_name)
+            async with stats_lock:
+                self.stats["sets_processed"] += 1
+            cards = await self.scrape_cards(sport, year, set_name)
+            if cards:
+                await self.process_cards_batch(cards, sport, year, set_name)
+
+        async def process_year(sport: str, year_data: dict[str, Any]) -> None:
+            year = year_data["year"]
+            if year.upper() == "TOTALS":
+                return
+            logger.info("Processing year: %s %s", sport, year)
+            async with stats_lock:
+                self.stats["years_processed"] += 1
+            sets = await self.scrape_sets(sport, year)
+            # Process sets for this year concurrently
+            async with asyncio.TaskGroup() as tg:
+                for set_data in sets:
+                    tg.create_task(process_set(sport, year, set_data))
 
         try:
             # Get categories/sports to scrape
@@ -355,49 +372,30 @@ class AsyncScrapingPipeline:
             else:
                 categories = await self.scrape_categories()
 
-            # Process each category/sport
+            # Process each category/sport (categories are processed sequentially to
+            # avoid overwhelming the target server at the top level)
             for category in categories:
                 sport = category["name"]
-
                 if sport.upper() == "TOTALS":
                     continue
 
-                print(f"\n🏈 Processing sport: {sport}")
+                logger.info("Processing sport: %s", sport)
                 self.stats["categories_processed"] += 1
-
-                # Scrape years for this sport
                 years = await self.scrape_years(sport)
 
-                for year_data in years:
-                    year = year_data["year"]
-
-                    if year.upper() == "TOTALS":
-                        continue
-
-                    print(f"\n📅 Processing year: {sport} {year}")
-                    self.stats["years_processed"] += 1
-
-                    # Scrape sets for this year
-                    sets = await self.scrape_sets(sport, year)
-
-                    for set_data in sets:
-                        set_name = set_data["set_name"]
-
-                        if set_name.upper() == "TOTALS":
-                            continue
-
-                        print(f"\n📦 Processing set: {sport} {year} {set_name}")
-                        self.stats["sets_processed"] += 1
-
-                        # Scrape cards for this set
-                        cards = await self.scrape_cards(sport, year, set_name)
-
-                        if cards:
-                            # Process cards in batches
-                            await self.process_cards_batch(cards, sport, year, set_name)
+                # Process years concurrently within each sport
+                try:
+                    async with asyncio.TaskGroup() as tg:
+                        for year_data in years:
+                            tg.create_task(process_year(sport, year_data))
+                except ExceptionGroup as eg:
+                    for exc in eg.exceptions:
+                        logger.error("Error processing year: %s", exc)
+                        async with stats_lock:
+                            self.stats["errors"] += 1
 
         except Exception as e:
-            print(f"❌ Pipeline error: {e}")
+            logger.error("Pipeline error: %s", e)
             self.stats["errors"] += 1
             if self.monitoring:
                 self.monitoring.metrics.record_scraping_error(
@@ -434,28 +432,28 @@ class AsyncScrapingPipeline:
         }
 
     def print_final_stats(self) -> None:
-        """Print final pipeline statistics."""
+        """Log final pipeline statistics."""
         stats = self.get_pipeline_stats()
 
-        print("\n" + "=" * 80)
-        print("📊 PIPELINE COMPLETION STATISTICS")
-        print("=" * 80)
-        print(f"Categories processed: {stats['categories_processed']}")
-        print(f"Years processed: {stats['years_processed']}")
-        print(f"Sets processed: {stats['sets_processed']}")
-        print(f"Cards processed: {stats['cards_processed']}")
-        print(f"Errors encountered: {stats['errors']}")
+        logger.info("=" * 60)
+        logger.info("PIPELINE COMPLETION STATISTICS")
+        logger.info("=" * 60)
+        logger.info("Categories processed: %d", stats["categories_processed"])
+        logger.info("Years processed: %d", stats["years_processed"])
+        logger.info("Sets processed: %d", stats["sets_processed"])
+        logger.info("Cards processed: %d", stats["cards_processed"])
+        logger.info("Errors encountered: %d", stats["errors"])
 
         if stats["runtime_seconds"]:
             runtime_str = str(datetime.timedelta(seconds=int(stats["runtime_seconds"])))
-            print(f"Total runtime: {runtime_str}")
+            logger.info("Total runtime: %s", runtime_str)
 
         if self.scraper:
             js_urls = self.scraper.get_js_required_urls()
             if js_urls:
-                print(f"JavaScript-required URLs: {len(js_urls)}")
+                logger.info("JavaScript-required URLs: %d", len(js_urls))
 
-        print("=" * 80)
+        logger.info("=" * 60)
 
 
 async def main():
@@ -498,13 +496,10 @@ async def main():
 
     # Caching options
     parser.add_argument(
-        "--enable-caching",
+        "--no-caching",
         action="store_true",
-        default=True,
-        help="Enable response caching (default: True)",
-    )
-    parser.add_argument(
-        "--disable-caching", action="store_true", help="Disable response caching"
+        default=False,
+        help="Disable response caching (default: caching is enabled)",
     )
     parser.add_argument(
         "--cache-ttl",
@@ -515,15 +510,10 @@ async def main():
 
     # Monitoring options
     parser.add_argument(
-        "--enable-monitoring",
+        "--no-monitoring",
         action="store_true",
-        default=True,
-        help="Enable performance monitoring (default: True)",
-    )
-    parser.add_argument(
-        "--disable-monitoring",
-        action="store_true",
-        help="Disable performance monitoring",
+        default=False,
+        help="Disable performance monitoring (default: monitoring is enabled)",
     )
 
     # Execution options
@@ -545,8 +535,8 @@ async def main():
         max_concurrent_db_operations=args.max_concurrent_db_operations,
         rate_limit=args.rate_limit,
         batch_size=args.batch_size,
-        enable_caching=args.enable_caching and not args.disable_caching,
-        enable_monitoring=args.enable_monitoring and not args.disable_monitoring,
+        enable_caching=not args.no_caching,
+        enable_monitoring=not args.no_monitoring,
         cache_ttl=args.cache_ttl,
         db_pool_size=args.db_pool_size,
         dry_run=args.dry_run,
@@ -559,10 +549,10 @@ async def main():
     async with AsyncScrapingPipeline(config) as pipeline:
         try:
             await pipeline.run_pipeline(args.sports)
-            print("✅ Pipeline completed successfully!")
+            logger.info("Pipeline completed successfully!")
             return 0
         except Exception as e:
-            print(f"❌ Pipeline failed: {e}")
+            logger.error("Pipeline failed: %s", e)
             return 1
 
 

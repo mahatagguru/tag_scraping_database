@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import pickle
 import time
 from typing import Any
 
@@ -16,14 +15,18 @@ import aiofiles
 
 
 class CacheManager:
-    """Manages caching of intermediate scraping results."""
+    """Manages caching of intermediate scraping results.
+
+    Uses JSON-serialized file-based caching with an in-memory LRU-style layer.
+    # TODO: implement database-backed cache layer if needed
+    """
 
     def __init__(
         self,
         cache_dir: str = "cache",
         default_ttl: int = 3600,  # 1 hour
         enable_checksums: bool = True,
-        enable_database_cache: bool = True,
+        max_memory_entries: int = 500,
     ):
         """
         Initialize cache manager.
@@ -32,17 +35,17 @@ class CacheManager:
             cache_dir: Directory for file-based cache
             default_ttl: Default time-to-live in seconds
             enable_checksums: Enable content checksum validation
-            enable_database_cache: Enable database-backed caching
+            max_memory_entries: Maximum entries kept in the in-memory cache (FIFO eviction)
         """
         self.cache_dir = cache_dir
         self.default_ttl = default_ttl
         self.enable_checksums = enable_checksums
-        self.enable_database_cache = enable_database_cache
+        self.max_memory_entries = max_memory_entries
 
         # Ensure cache directory exists
         os.makedirs(cache_dir, exist_ok=True)
 
-        # In-memory cache for frequently accessed data
+        # In-memory cache for frequently accessed data (bounded)
         self._memory_cache: dict[str, tuple[Any, float]] = {}
 
     def _get_cache_key(self, key: str, category: str = "default") -> str:
@@ -52,17 +55,16 @@ class CacheManager:
     def _get_file_path(self, key: str) -> str:
         """Get file path for cache entry."""
         # Use hash to avoid filesystem issues with special characters
-        key_hash = hashlib.md5(key.encode()).hexdigest()
-        return os.path.join(self.cache_dir, f"{key_hash}.cache")
+        key_hash = hashlib.md5(key.encode(), usedforsecurity=False).hexdigest()
+        return os.path.join(self.cache_dir, f"{key_hash}.json.cache")
 
     def _calculate_checksum(self, data: Any) -> str:
         """Calculate checksum for data."""
         if isinstance(data, (dict, list)):
-            # Sort dict keys for consistent hashing
             data_str = json.dumps(data, sort_keys=True)
         else:
             data_str = str(data)
-        return hashlib.md5(data_str.encode()).hexdigest()
+        return hashlib.md5(data_str.encode(), usedforsecurity=False).hexdigest()
 
     def _is_cache_valid(self, timestamp: float, ttl: int) -> bool:
         """Check if cache entry is still valid."""
@@ -97,14 +99,18 @@ class CacheManager:
         file_path = self._get_file_path(cache_key)
         if os.path.exists(file_path):
             try:
-                async with aiofiles.open(file_path, "rb") as f:
-                    cache_data = pickle.loads(await f.read())
+                async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+                    cache_entry = json.loads(await f.read())
 
-                data, timestamp, checksum = cache_data
+                data = cache_entry["data"]
+                timestamp = cache_entry["timestamp"]
 
                 if self._is_cache_valid(timestamp, ttl):
                     # Store in memory cache for faster access
                     self._memory_cache[cache_key] = (data, timestamp)
+                    if len(self._memory_cache) > self.max_memory_entries:
+                        oldest_key = next(iter(self._memory_cache))
+                        del self._memory_cache[oldest_key]
                     return data
                 else:
                     # Remove expired cache file
@@ -112,10 +118,6 @@ class CacheManager:
 
             except Exception as e:
                 print(f"Error reading cache file {file_path}: {e}")
-
-        # Check database cache if enabled
-        if self.enable_database_cache:
-            return await self._get_from_database_cache(key, category, ttl)
 
         return None
 
@@ -135,23 +137,27 @@ class CacheManager:
         timestamp = time.time()
         checksum = self._calculate_checksum(data) if self.enable_checksums else None
 
-        # Store in memory cache
+        # Store in memory cache (bounded FIFO)
         self._memory_cache[cache_key] = (data, timestamp)
+        if len(self._memory_cache) > self.max_memory_entries:
+            oldest_key = next(iter(self._memory_cache))
+            del self._memory_cache[oldest_key]
 
-        # Store in file cache
+        # Store in file cache (JSON)
         try:
             file_path = self._get_file_path(cache_key)
-            cache_data = (data, timestamp, checksum)
+            cache_entry = {
+                "category": category,
+                "data": data,
+                "timestamp": timestamp,
+                "checksum": checksum,
+            }
 
-            async with aiofiles.open(file_path, "wb") as f:
-                await f.write(pickle.dumps(cache_data))
+            async with aiofiles.open(file_path, "w", encoding="utf-8") as f:
+                await f.write(json.dumps(cache_entry))
 
         except Exception as e:
-            print(f"Error writing cache file {file_path}: {e}")
-
-        # Store in database cache if enabled
-        if self.enable_database_cache:
-            await self._set_database_cache(key, category, data, timestamp, checksum)
+            print(f"Error writing cache file: {e}")
 
     async def invalidate(self, key: str, category: str = "default") -> None:
         """Invalidate cache entry."""
@@ -169,10 +175,6 @@ class CacheManager:
             except Exception as e:
                 print(f"Error removing cache file {file_path}: {e}")
 
-        # Remove from database cache
-        if self.enable_database_cache:
-            await self._invalidate_database_cache(key, category)
-
     async def clear_category(self, category: str) -> None:
         """Clear all cache entries for a category."""
         # Clear memory cache
@@ -180,76 +182,32 @@ class CacheManager:
         for key in keys_to_remove:
             del self._memory_cache[key]
 
-        # Clear file cache
+        # Clear file cache — only remove files that belong to the target category
         for filename in os.listdir(self.cache_dir):
-            if filename.endswith(".cache"):
-                try:
-                    file_path = os.path.join(self.cache_dir, filename)
-                    async with aiofiles.open(file_path, "rb") as f:
-                        pickle.loads(await f.read())
-
-                    # Check if this file belongs to the category
-                    # We'd need to store category info in the cache data for this to work properly
-                    # For now, we'll remove all cache files (simple approach)
+            if not filename.endswith(".json.cache"):
+                continue
+            file_path = os.path.join(self.cache_dir, filename)
+            try:
+                async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+                    cache_entry = json.loads(await f.read())
+                if cache_entry.get("category") == category:
                     os.remove(file_path)
-
-                except Exception:
-                    continue
-
-        # Clear database cache
-        if self.enable_database_cache:
-            await self._clear_database_category(category)
+            except Exception:
+                continue
 
     async def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         memory_entries = len(self._memory_cache)
-        memory_size = sum(
-            len(str(data).encode()) for data, _ in self._memory_cache.values()
-        )
-
         file_entries = len(
-            [f for f in os.listdir(self.cache_dir) if f.endswith(".cache")]
+            [f for f in os.listdir(self.cache_dir) if f.endswith(".json.cache")]
         )
 
         return {
             "memory_entries": memory_entries,
-            "memory_size_mb": memory_size / (1024 * 1024),
+            "max_memory_entries": self.max_memory_entries,
             "file_entries": file_entries,
             "cache_directory": self.cache_dir,
         }
-
-    async def _get_from_database_cache(
-        self, key: str, category: str, ttl: int
-    ) -> Any | None:
-        """Get data from database cache."""
-        # This would require a database table for caching
-        # For now, return None (placeholder implementation)
-        return None
-
-    async def _set_database_cache(
-        self,
-        key: str,
-        category: str,
-        data: Any,
-        timestamp: float,
-        checksum: str | None,
-    ) -> None:
-        """Set data in database cache."""
-        # This would require a database table for caching
-        # For now, do nothing (placeholder implementation)
-        pass
-
-    async def _invalidate_database_cache(self, key: str, category: str) -> None:
-        """Invalidate database cache entry."""
-        # This would require a database table for caching
-        # For now, do nothing (placeholder implementation)
-        pass
-
-    async def _clear_database_category(self, category: str) -> None:
-        """Clear database cache category."""
-        # This would require a database table for caching
-        # For now, do nothing (placeholder implementation)
-        pass
 
 
 class ScrapingCacheManager:
@@ -330,14 +288,14 @@ class ScrapingCacheManager:
     async def get_card_details(self, card_url: str) -> dict[str, Any] | None:
         """Get cached card details."""
         return await self.cache.get(
-            f"card_details_{hashlib.md5(card_url.encode()).hexdigest()}",
+            f"card_details_{hashlib.md5(card_url.encode(), usedforsecurity=False).hexdigest()}",
             self.CARD_DETAILS,
         )
 
     async def set_card_details(self, card_url: str, details: dict[str, Any]) -> None:
         """Cache card details."""
         await self.cache.set(
-            f"card_details_{hashlib.md5(card_url.encode()).hexdigest()}",
+            f"card_details_{hashlib.md5(card_url.encode(), usedforsecurity=False).hexdigest()}",
             details,
             self.CARD_DETAILS,
             self.ttl_settings[self.CARD_DETAILS],

@@ -1,6 +1,11 @@
 import datetime
+import os
+import sys
 
 from sqlalchemy.orm import Session
+
+# Ensure src/ is on the path regardless of the working directory
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models import (
     Card,
@@ -229,16 +234,28 @@ def upsert_card(
         session.add(card)
         session.flush()
     else:
-        card.category_id = category_id
-        card.year_id = year_id
-        card.set_id = set_id
-        card.card_number = card_number
-        card.player = player
-        card.detail_url = detail_url
-        card.image_url = image_url
-        card.subset_name = subset_name
-        card.variation = variation
-        card.cert_number = cert_number
+        # Only update fields that are explicitly provided (non-None) to avoid
+        # erasing existing data when a partial update is performed.
+        if category_id is not None:
+            card.category_id = category_id
+        if year_id is not None:
+            card.year_id = year_id
+        if set_id is not None:
+            card.set_id = set_id
+        if card_number is not None:
+            card.card_number = card_number
+        if player is not None:
+            card.player = player
+        if detail_url is not None:
+            card.detail_url = detail_url
+        if image_url is not None:
+            card.image_url = image_url
+        if subset_name is not None:
+            card.subset_name = subset_name
+        if variation is not None:
+            card.variation = variation
+        if cert_number is not None:
+            card.cert_number = cert_number
         card.updated_at = now
     return card
 
