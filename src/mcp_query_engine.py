@@ -547,3 +547,442 @@ def get_database_stats() -> dict[str, Any]:
     d = _row_to_dict(row) if row else {}
     d["database_dialect"] = _db_dialect
     return d
+
+
+# ---------------------------------------------------------------------------
+# 11. get_population_trend
+# ---------------------------------------------------------------------------
+
+
+def get_population_trend(
+    sport: str,
+    year: str | None = None,
+    set_title: str | None = None,
+    card_name: str | None = None,
+    grade: str | None = None,
+    granularity: str = "month",
+) -> dict[str, Any]:
+    """
+    Show how grading volume has changed over time for a card/set/sport.
+
+    Uses card_grade_rows.completed_date_iso (actual grading date) as the
+    time axis.  Periods where completed_date_iso is NULL are counted
+    separately so the caller knows how much data lacks date information.
+
+    Returns a dict with keys:
+        sport, filters, granularity,
+        periods (list of {period, grade, count}),
+        total_with_dates, total_without_dates
+    """
+    # Build WHERE filters
+    filters = "cgr.sport = :sport AND cgr.is_active = true"
+    params: dict[str, Any] = {"sport": sport}
+
+    if year:
+        filters += " AND cgr.year = :year"
+        params["year"] = year
+    if set_title:
+        filters += " AND cgr.set_title = :set_title"
+        params["set_title"] = set_title
+    if card_name:
+        filters += " AND cgr.card_name = :card_name"
+        params["card_name"] = card_name
+    if grade:
+        filters += " AND cgr.tag_grade = :grade"
+        params["grade"] = grade
+
+    # Dialect-aware date truncation
+    valid_granularities = {"year", "month", "week"}
+    gran = granularity if granularity in valid_granularities else "month"
+
+    if _db_dialect == "sqlite":
+        fmt_map = {"year": "%Y", "month": "%Y-%m", "week": "%Y-%W"}
+        period_expr = f"strftime('{fmt_map[gran]}', cgr.completed_date_iso)"
+    else:
+        period_expr = f"DATE_TRUNC('{gran}', cgr.completed_date_iso)"
+
+    trend_sql = text(
+        f"""
+        SELECT
+            {period_expr}                   AS period,
+            cgr.tag_grade,
+            COUNT(cgr.cert_number)          AS count
+        FROM card_grade_rows cgr
+        WHERE {filters}
+          AND cgr.completed_date_iso IS NOT NULL
+        GROUP BY period, cgr.tag_grade
+        ORDER BY period ASC NULLS LAST
+        """
+    )
+    no_date_sql = text(
+        f"""
+        SELECT COUNT(cgr.cert_number) AS count
+        FROM card_grade_rows cgr
+        WHERE {filters}
+          AND cgr.completed_date_iso IS NULL
+        """
+    )
+    with_date_sql = text(
+        f"""
+        SELECT COUNT(cgr.cert_number) AS count
+        FROM card_grade_rows cgr
+        WHERE {filters}
+          AND cgr.completed_date_iso IS NOT NULL
+        """
+    )
+
+    with _session() as sess:
+        trend_rows = sess.execute(trend_sql, params).fetchall()
+        no_date_row = sess.execute(no_date_sql, params).fetchone()
+        with_date_row = sess.execute(with_date_sql, params).fetchone()
+
+    periods = []
+    for r in trend_rows:
+        p = str(r.period) if r.period is not None else None
+        if hasattr(r.period, "isoformat"):
+            p = r.period.isoformat()
+        periods.append({"period": p, "grade": r.tag_grade, "count": r.count})
+
+    return {
+        "sport": sport,
+        "filters": {
+            "year": year,
+            "set_title": set_title,
+            "card_name": card_name,
+            "grade": grade,
+        },
+        "granularity": gran,
+        "periods": periods,
+        "total_with_dates": with_date_row.count if with_date_row else 0,
+        "total_without_dates": no_date_row.count if no_date_row else 0,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 12. trigger_scrape
+# ---------------------------------------------------------------------------
+
+
+async def trigger_scrape(
+    sports: list[str] | None = None,
+    year_filter: list[str] | None = None,
+    set_filter: list[str] | None = None,
+    card_filter: list[str] | None = None,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """
+    Launch a targeted re-scrape as a background subprocess.
+
+    Invokes src/scraper/async_pipeline.py (which has argparse CLI support)
+    via asyncio.create_subprocess_exec, detached so the MCP server does not
+    block.  All child stdout/stderr is redirected to DEVNULL to protect the
+    parent's stdio MCP transport.
+
+    Returns { status, pid, command } on success or { status, message } on error.
+    """
+    import asyncio
+    import subprocess
+
+    cmd = [sys.executable, "-m", "src.scraper.async_pipeline"]
+
+    if sports:
+        cmd += ["--sports"] + sports
+    if year_filter:
+        cmd += ["--year-filter"] + year_filter
+    if set_filter:
+        cmd += ["--set-filter"] + set_filter
+    if card_filter:
+        cmd += ["--card-filter"] + card_filter
+    if dry_run:
+        cmd.append("--dry-run")
+
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=_project_root,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return {
+            "status": "started",
+            "pid": proc.pid,
+            "command": " ".join(cmd),
+            "filters": {
+                "sports": sports,
+                "year_filter": year_filter,
+                "set_filter": set_filter,
+                "card_filter": card_filter,
+                "dry_run": dry_run,
+            },
+        }
+    except Exception as exc:
+        return {"status": "error", "message": str(exc), "command": " ".join(cmd)}
+
+
+# ---------------------------------------------------------------------------
+# 13. get_card_image
+# ---------------------------------------------------------------------------
+
+
+def get_card_image(
+    sport: str,
+    year: str,
+    set_title: str,
+    card_name: str,
+) -> dict[str, Any]:
+    """
+    Return image URL(s) for a card from the normalized cards table.
+
+    Matches card_name against cards.player using a case-insensitive LIKE.
+    Falls back to an empty matches list when the normalized hierarchy has
+    not been populated (only card_grade_rows data exists).
+
+    Returns { matches: [{image_url, player, card_uid, card_number,
+                          subset_name, variation, cert_number}], count }
+    """
+    pattern = f"%{card_name.lower()}%"
+    sql = text(
+        """
+        SELECT
+            c.image_url,
+            c.player,
+            c.card_uid,
+            c.card_number,
+            c.subset_name,
+            c.variation,
+            c.cert_number
+        FROM cards c
+        JOIN sets        s   ON c.set_id      = s.id
+        JOIN years       y   ON c.year_id     = y.id
+        JOIN categories  cat ON c.category_id = cat.id
+        WHERE LOWER(cat.name)         = LOWER(:sport)
+          AND CAST(y.year AS TEXT)    = :year
+          AND LOWER(s.set_name)       = LOWER(:set_title)
+          AND LOWER(c.player)         LIKE :pattern
+          AND c.is_active             = true
+          AND c.image_url IS NOT NULL
+        LIMIT 10
+        """
+    )
+    params = {
+        "sport": sport,
+        "year": year,
+        "set_title": set_title,
+        "pattern": pattern,
+    }
+    with _session() as sess:
+        rows = sess.execute(sql, params).fetchall()
+
+    matches = [_row_to_dict(r) for r in rows]
+    return {"matches": matches, "count": len(matches)}
+
+
+# ---------------------------------------------------------------------------
+# 14. compare_grades
+# ---------------------------------------------------------------------------
+
+
+def compare_grades(
+    scope: str,
+    a: dict[str, str],
+    b: dict[str, str],
+) -> dict[str, Any]:
+    """
+    Compare the grade distributions of two cards or two sets side by side.
+
+    scope: 'card' or 'set'
+    a, b: dicts with keys sport, year, set_title (and card_name for scope='card')
+
+    Reuses existing get_card_population() / get_set_population_summary()
+    — no new SQL required.
+
+    Returns {
+        scope,
+        a: {label, total_graded, gem_mint_rate},
+        b: {label, total_graded, gem_mint_rate},
+        comparison: [{grade, a_count, b_count, delta, delta_pct}]
+    }
+    """
+    if scope == "card":
+        data_a = get_card_population(
+            a["sport"], a["year"], a["set_title"], a["card_name"]
+        )
+        data_b = get_card_population(
+            b["sport"], b["year"], b["set_title"], b["card_name"]
+        )
+        label_a = f"{a['year']} {a['set_title']} {a['card_name']} ({a['sport']})"
+        label_b = f"{b['year']} {b['set_title']} {b['card_name']} ({b['sport']})"
+    else:
+        data_a = get_set_population_summary(a["sport"], a["year"], a["set_title"])
+        data_b = get_set_population_summary(b["sport"], b["year"], b["set_title"])
+        label_a = f"{a['year']} {a['set_title']} ({a['sport']})"
+        label_b = f"{b['year']} {b['set_title']} ({b['sport']})"
+
+    # Index grades → count for each side
+    a_by_grade = {g["grade"]: g["count"] for g in data_a.get("grades", [])}
+    b_by_grade = {g["grade"]: g["count"] for g in data_b.get("grades", [])}
+    all_grades = sorted(
+        set(a_by_grade) | set(b_by_grade),
+        key=lambda x: (x is None, x),
+        reverse=True,
+    )
+
+    comparison = []
+    for g in all_grades:
+        a_cnt = a_by_grade.get(g, 0)
+        b_cnt = b_by_grade.get(g, 0)
+        delta = b_cnt - a_cnt
+        if a_cnt > 0:
+            delta_pct = f"{delta / a_cnt * 100:+.1f}%"
+        elif b_cnt > 0:
+            delta_pct = "+∞"
+        else:
+            delta_pct = "0%"
+        comparison.append(
+            {
+                "grade": g,
+                "a_count": a_cnt,
+                "b_count": b_cnt,
+                "delta": delta,
+                "delta_pct": delta_pct,
+            }
+        )
+
+    def _gem_rate(data: dict) -> float:
+        total = data.get("total_graded", 0)
+        if not total:
+            return 0.0
+        top = next(
+            (g["count"] for g in data.get("grades", []) if g["grade"] == "10"), 0
+        )
+        return round(top / total * 100, 1)
+
+    return {
+        "scope": scope,
+        "a": {
+            "label": label_a,
+            "total_graded": data_a.get("total_graded", 0),
+            "gem_mint_rate": _gem_rate(data_a),
+        },
+        "b": {
+            "label": label_b,
+            "total_graded": data_b.get("total_graded", 0),
+            "gem_mint_rate": _gem_rate(data_b),
+        },
+        "comparison": comparison,
+    }
+
+
+# ---------------------------------------------------------------------------
+# 15. get_rarity_score
+# ---------------------------------------------------------------------------
+
+
+def get_rarity_score(
+    sport: str,
+    year: str | None = None,
+    set_title: str | None = None,
+    card_name: str | None = None,
+    grade: str = "10",
+) -> dict[str, Any]:
+    """
+    Calculate how rare a specific TAG grade is for a card, set, or sport.
+
+    Scope is inferred from the combination of arguments provided:
+      - card_name supplied  → scope = 'card'
+      - set_title supplied  → scope = 'set'
+      - neither             → scope = 'sport'
+
+    Rarity tiers (based on % of target grade vs total graded):
+      < 1%   → Ultra Rare
+      1–5%   → Very Rare
+      5–15%  → Rare
+      15–30% → Uncommon
+      ≥ 30%  → Common
+
+    Returns a dict with keys:
+        scope, label, target_grade, target_count, total_graded,
+        gem_mint_rate (% grade 10), high_grade_rate (% grade ≥ 9),
+        rarity_tier, grade_breakdown
+    """
+    # Determine scope and build filters
+    if card_name and set_title and year:
+        scope = "card"
+        label = f"{year} {set_title} {card_name} ({sport})"
+    elif set_title and year:
+        scope = "set"
+        label = f"{year} {set_title} ({sport})"
+    else:
+        scope = "sport"
+        label = sport
+
+    filters = "cgr.sport = :sport AND cgr.is_active = true"
+    params: dict[str, Any] = {"sport": sport}
+
+    if year:
+        filters += " AND cgr.year = :year"
+        params["year"] = year
+    if set_title:
+        filters += " AND cgr.set_title = :set_title"
+        params["set_title"] = set_title
+    if card_name:
+        filters += " AND cgr.card_name = :card_name"
+        params["card_name"] = card_name
+
+    sql = text(
+        f"""
+        SELECT cgr.tag_grade, COUNT(cgr.cert_number) AS count
+        FROM card_grade_rows cgr
+        WHERE {filters}
+        GROUP BY cgr.tag_grade
+        ORDER BY cgr.tag_grade DESC NULLS LAST
+        """
+    )
+
+    with _session() as sess:
+        rows = sess.execute(sql, params).fetchall()
+
+    grade_data = [{"grade": r.tag_grade, "count": r.count} for r in rows]
+    total = sum(g["count"] for g in grade_data)
+
+    for g in grade_data:
+        g["pct"] = round(g["count"] / total * 100, 1) if total else 0.0
+
+    target_count = next(
+        (g["count"] for g in grade_data if g["grade"] == grade), 0
+    )
+    gem_mint_rate = round(target_count / total * 100, 1) if total else 0.0
+
+    # High-grade rate: sum of all grades that are numeric and >= 9
+    high_grade_count = 0
+    for g in grade_data:
+        try:
+            if g["grade"] is not None and float(g["grade"]) >= 9:
+                high_grade_count += g["count"]
+        except (ValueError, TypeError):
+            pass
+    high_grade_rate = round(high_grade_count / total * 100, 1) if total else 0.0
+
+    # Rarity tier classification
+    if gem_mint_rate < 1:
+        tier = "Ultra Rare"
+    elif gem_mint_rate < 5:
+        tier = "Very Rare"
+    elif gem_mint_rate < 15:
+        tier = "Rare"
+    elif gem_mint_rate < 30:
+        tier = "Uncommon"
+    else:
+        tier = "Common"
+
+    return {
+        "scope": scope,
+        "label": label,
+        "target_grade": grade,
+        "target_count": target_count,
+        "total_graded": total,
+        "gem_mint_rate": gem_mint_rate,
+        "high_grade_rate": high_grade_rate,
+        "rarity_tier": tier,
+        "grade_breakdown": grade_data,
+    }

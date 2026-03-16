@@ -2,7 +2,7 @@
 """
 MCP (Model Context Protocol) server for TAG Grading population data.
 
-Exposes 10 tools that allow Claude and other MCP clients to query the
+Exposes 15 tools that allow Claude and other MCP clients to query the
 TAG Grading population database by sport, year, set, card, and cert number.
 
 Run via:
@@ -33,8 +33,12 @@ from mcp.types import TextContent, Tool
 
 # Import the query engine (all DB output goes to stderr automatically)
 from src.mcp_query_engine import (
+    compare_grades,
+    get_card_image,
     get_card_population,
     get_database_stats,
+    get_population_trend,
+    get_rarity_score,
     get_set_population_summary,
     get_sport_overview,
     get_top_graded_cards,
@@ -43,6 +47,7 @@ from src.mcp_query_engine import (
     list_years,
     lookup_cert,
     search_cards,
+    trigger_scrape,
 )
 
 # ---------------------------------------------------------------------------
@@ -269,6 +274,198 @@ _TOOLS: list[Tool] = [
             "required": [],
         },
     ),
+    Tool(
+        name="get_population_trend",
+        description=(
+            "Show how grading volume has changed over time for a card, set, or sport. "
+            "Uses the actual grading date (completed_date_iso) on each cert to bucket "
+            "counts by year, month, or week. Useful for understanding submission trends "
+            "and when certain cards peaked in popularity with collectors."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "sport": {
+                    "type": "string",
+                    "description": "Sport name (required), e.g. 'Baseball'",
+                },
+                "year": {
+                    "type": "string",
+                    "description": "Optional year filter, e.g. '1989'",
+                },
+                "set_title": {
+                    "type": "string",
+                    "description": "Optional set filter, e.g. 'Topps'",
+                },
+                "card_name": {
+                    "type": "string",
+                    "description": "Optional card name filter",
+                },
+                "grade": {
+                    "type": "string",
+                    "description": "Optional — limit trend to a specific grade, e.g. '10'",
+                },
+                "granularity": {
+                    "type": "string",
+                    "description": "Time bucket size: 'year', 'month' (default), or 'week'",
+                    "enum": ["year", "month", "week"],
+                    "default": "month",
+                },
+            },
+            "required": ["sport"],
+        },
+    ),
+    Tool(
+        name="trigger_scrape",
+        description=(
+            "Launch a targeted re-scrape of TAG Grading population data in the background. "
+            "The scrape runs as a detached subprocess; this tool returns immediately with "
+            "the process ID. Filter by sport, year, set, or card to limit scope. "
+            "Use dry_run=true to validate without writing to the database."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "sports": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Sports to scrape, e.g. ['Baseball', 'Hockey']",
+                },
+                "year_filter": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Limit to specific years, e.g. ['1989', '1990']",
+                },
+                "set_filter": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Limit to specific sets, e.g. ['Topps', 'Upper Deck']",
+                },
+                "card_filter": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Limit to specific card names",
+                },
+                "dry_run": {
+                    "type": "boolean",
+                    "description": "If true, simulate scrape without writing to the database",
+                    "default": False,
+                },
+            },
+            "required": [],
+        },
+    ),
+    Tool(
+        name="get_card_image",
+        description=(
+            "Return image URL(s) for a card from the TAG Grading database. "
+            "Useful for visual display in clients that support images. "
+            "Matches the card name against the player field using a partial, "
+            "case-insensitive search."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "sport": {
+                    "type": "string",
+                    "description": "Sport name, e.g. 'Baseball'",
+                },
+                "year": {
+                    "type": "string",
+                    "description": "Year as a string, e.g. '1989'",
+                },
+                "set_title": {
+                    "type": "string",
+                    "description": "Set name, e.g. 'Upper Deck'",
+                },
+                "card_name": {
+                    "type": "string",
+                    "description": "Partial player/card name, e.g. 'Griffey'",
+                },
+            },
+            "required": ["sport", "year", "set_title", "card_name"],
+        },
+    ),
+    Tool(
+        name="compare_grades",
+        description=(
+            "Compare the grade distributions of two cards or two sets side by side. "
+            "Returns counts for every grade across both subjects with a delta column "
+            "and the gem-mint rate (% TAG 10) for each. "
+            "scope must be 'card' (requires card_name in a/b) or 'set'."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "scope": {
+                    "type": "string",
+                    "enum": ["card", "set"],
+                    "description": "'card' to compare two individual cards, 'set' to compare two sets",
+                },
+                "a": {
+                    "type": "object",
+                    "description": "First subject — sport, year, set_title (+ card_name for scope=card)",
+                    "properties": {
+                        "sport":     {"type": "string"},
+                        "year":      {"type": "string"},
+                        "set_title": {"type": "string"},
+                        "card_name": {"type": "string"},
+                    },
+                    "required": ["sport", "year", "set_title"],
+                },
+                "b": {
+                    "type": "object",
+                    "description": "Second subject — same structure as 'a'",
+                    "properties": {
+                        "sport":     {"type": "string"},
+                        "year":      {"type": "string"},
+                        "set_title": {"type": "string"},
+                        "card_name": {"type": "string"},
+                    },
+                    "required": ["sport", "year", "set_title"],
+                },
+            },
+            "required": ["scope", "a", "b"],
+        },
+    ),
+    Tool(
+        name="get_rarity_score",
+        description=(
+            "Calculate how rare a specific TAG grade is for a card, set, or sport. "
+            "Returns a rarity tier (Ultra Rare / Very Rare / Rare / Uncommon / Common) "
+            "based on the percentage of submissions receiving that grade, plus the "
+            "gem-mint rate (% TAG 10) and high-grade rate (% ≥ 9). "
+            "Scope is inferred: supply card_name for card scope, set_title for set scope, "
+            "or just sport for sport-wide rarity."
+        ),
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "sport": {
+                    "type": "string",
+                    "description": "Sport name (required)",
+                },
+                "year": {
+                    "type": "string",
+                    "description": "Year, required for card/set scope",
+                },
+                "set_title": {
+                    "type": "string",
+                    "description": "Set name, required for card/set scope",
+                },
+                "card_name": {
+                    "type": "string",
+                    "description": "Card name, required for card scope",
+                },
+                "grade": {
+                    "type": "string",
+                    "description": "Grade to score (default '10')",
+                    "default": "10",
+                },
+            },
+            "required": ["sport"],
+        },
+    ),
 ]
 
 
@@ -380,6 +577,71 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
 
         elif name == "get_database_stats":
             return _result(get_database_stats())
+
+        elif name == "get_population_trend":
+            sport = arguments.get("sport", "")
+            if not sport:
+                return _error("'sport' is required")
+            return _result(
+                get_population_trend(
+                    sport=sport,
+                    year=arguments.get("year"),
+                    set_title=arguments.get("set_title"),
+                    card_name=arguments.get("card_name"),
+                    grade=arguments.get("grade"),
+                    granularity=arguments.get("granularity", "month"),
+                )
+            )
+
+        elif name == "trigger_scrape":
+            result = await trigger_scrape(
+                sports=arguments.get("sports"),
+                year_filter=arguments.get("year_filter"),
+                set_filter=arguments.get("set_filter"),
+                card_filter=arguments.get("card_filter"),
+                dry_run=bool(arguments.get("dry_run", False)),
+            )
+            return _result(result)
+
+        elif name == "get_card_image":
+            required = ["sport", "year", "set_title", "card_name"]
+            missing = [f for f in required if not arguments.get(f)]
+            if missing:
+                return _error(f"Missing required fields: {missing}")
+            return _result(
+                get_card_image(
+                    sport=arguments["sport"],
+                    year=arguments["year"],
+                    set_title=arguments["set_title"],
+                    card_name=arguments["card_name"],
+                )
+            )
+
+        elif name == "compare_grades":
+            scope = arguments.get("scope", "")
+            a = arguments.get("a", {})
+            b = arguments.get("b", {})
+            if not scope or not a or not b:
+                return _error("'scope', 'a', and 'b' are required")
+            if scope == "card":
+                for side, label in [(a, "a"), (b, "b")]:
+                    if not side.get("card_name"):
+                        return _error(f"'card_name' is required in '{label}' for scope='card'")
+            return _result(compare_grades(scope=scope, a=a, b=b))
+
+        elif name == "get_rarity_score":
+            sport = arguments.get("sport", "")
+            if not sport:
+                return _error("'sport' is required")
+            return _result(
+                get_rarity_score(
+                    sport=sport,
+                    year=arguments.get("year"),
+                    set_title=arguments.get("set_title"),
+                    card_name=arguments.get("card_name"),
+                    grade=arguments.get("grade", "10"),
+                )
+            )
 
         else:
             return _error(f"Unknown tool: {name}")
