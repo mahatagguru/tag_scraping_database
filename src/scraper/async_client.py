@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import sys
 import time
 from typing import Any
 from urllib.parse import urlparse
@@ -15,23 +14,7 @@ from urllib.parse import urlparse
 import aiohttp
 from selectolax.parser import HTMLParser
 
-# Handle ExceptionGroup for Python < 3.11
-if sys.version_info < (3, 11):
-    try:
-        from exceptiongroup import ExceptionGroup
-    except ImportError:
-        # Fallback: create a simple ExceptionGroup-like class
-        class ExceptionGroup(Exception):  # type: ignore[no-redef]
-            def __init__(self, message: str, exceptions: list[Exception]):
-                super().__init__(message)
-                self.exceptions = exceptions
-
-    # Provide a BaseExceptionGroup-compatible name for older runtimes
-    BaseExceptionGroup = ExceptionGroup
-else:
-    from builtins import BaseExceptionGroup
-
-    ExceptionGroup = BaseExceptionGroup  # type: ignore[no-redef,misc]
+from .compat import BaseExceptionGroup, ExceptionGroup
 
 
 class AsyncHTTPClient:
@@ -45,6 +28,7 @@ class AsyncHTTPClient:
         rate_limit: float = 1.0,
         enable_cache: bool = True,
         cache_ttl: int = 3600,  # 1 hour
+        max_cache_entries: int = 1000,
     ):
         """
         Initialize async HTTP client.
@@ -56,6 +40,7 @@ class AsyncHTTPClient:
             rate_limit: Minimum delay between requests in seconds
             enable_cache: Enable response caching
             cache_ttl: Cache time-to-live in seconds
+            max_cache_entries: Maximum number of entries in the in-memory cache
         """
         self.max_connections = max_connections
         self.max_connections_per_host = max_connections_per_host
@@ -63,11 +48,12 @@ class AsyncHTTPClient:
         self.rate_limit = rate_limit
         self.enable_cache = enable_cache
         self.cache_ttl = cache_ttl
+        self.max_cache_entries = max_cache_entries
 
         # Rate limiting
         self._last_request_time = {}
 
-        # Simple in-memory cache
+        # Simple in-memory cache (bounded by max_cache_entries, FIFO eviction)
         self._cache: dict[str, tuple[str, float]] = {}
 
         # Session will be created when needed
@@ -103,7 +89,7 @@ class AsyncHTTPClient:
 
     def _get_cache_key(self, url: str) -> str:
         """Generate cache key for URL."""
-        return hashlib.md5(url.encode()).hexdigest()
+        return hashlib.md5(url.encode(), usedforsecurity=False).hexdigest()
 
     def _is_cache_valid(self, cache_entry: tuple[str, float]) -> bool:
         """Check if cache entry is still valid."""
@@ -142,13 +128,14 @@ class AsyncHTTPClient:
                 "HTTP client not initialized. Use async context manager."
             )
 
+        # Compute cache key once (if caching is enabled)
+        cache_key = self._get_cache_key(url) if (use_cache and self.enable_cache) else None
+
         # Check cache first
-        if use_cache and self.enable_cache:
-            cache_key = self._get_cache_key(url)
-            if cache_key in self._cache:
-                content, timestamp = self._cache[cache_key]
-                if self._is_cache_valid((content, timestamp)):
-                    return content
+        if cache_key and cache_key in self._cache:
+            content, timestamp = self._cache[cache_key]
+            if self._is_cache_valid((content, timestamp)):
+                return content
 
         # Apply rate limiting
         host = urlparse(url).netloc
@@ -160,10 +147,12 @@ class AsyncHTTPClient:
                 response.raise_for_status()
                 content = await response.text()
 
-                # Cache the response
-                if self.enable_cache:
-                    cache_key = self._get_cache_key(url)
+                # Cache the response with FIFO eviction when limit is reached
+                if cache_key:
                     self._cache[cache_key] = (content, time.time())
+                    if len(self._cache) > self.max_cache_entries:
+                        oldest_key = next(iter(self._cache))
+                        del self._cache[oldest_key]
 
                 return content
 

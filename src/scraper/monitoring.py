@@ -94,22 +94,20 @@ class PerformanceMetrics:
             "memory_usage_bytes", "Memory usage in bytes", registry=self._registry
         )
 
-        self.active_connections = Gauge(
-            "active_connections",
-            "Number of active connections",
-            registry=self._registry,
-        )
-
-        # Start background monitoring
+        # Start background monitoring (only if an event loop is already running)
         self._monitoring_task = None
         self._start_monitoring()
 
     def _start_monitoring(self) -> None:
-        """Start background monitoring task."""
+        """Start background monitoring task (no-op if no event loop is running)."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            # No running event loop — caller must trigger monitoring explicitly
+            # once inside an async context.
+            return
         if self._monitoring_task is None or self._monitoring_task.done():
-            self._monitoring_task = asyncio.create_task(
-                self._monitor_system_resources()
-            )
+            self._monitoring_task = loop.create_task(self._monitor_system_resources())
 
     async def _monitor_system_resources(self) -> None:
         """Monitor system resources in background."""
@@ -125,11 +123,6 @@ class PerformanceMetrics:
                 self.memory_usage.set(memory.used)
                 self._record_metric("memory_usage_bytes", memory.used)
                 self._record_metric("memory_usage_percent", memory.percent)
-
-                # Network connections
-                connections = len(psutil.net_connections())
-                self.active_connections.set(connections)
-                self._record_metric("active_connections", connections)
 
                 # Disk usage
                 disk = psutil.disk_usage("/")
@@ -376,11 +369,7 @@ def profile_function(name: str | None = None):
 
             monitor.profiler.start_profile(profile_name)
             try:
-                if asyncio.iscoroutinefunction(func):
-                    result = await func(*args, **kwargs)
-                else:
-                    result = func(*args, **kwargs)
-                return result
+                return await func(*args, **kwargs)
             finally:
                 monitor.profiler.end_profile(profile_name)
 

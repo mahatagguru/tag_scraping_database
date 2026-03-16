@@ -7,27 +7,8 @@ from __future__ import annotations
 
 import asyncio
 import os
-import sys
 from contextlib import asynccontextmanager
 from typing import Any
-
-# Handle ExceptionGroup for Python < 3.11
-if sys.version_info < (3, 11):
-    try:
-        from exceptiongroup import ExceptionGroup
-    except ImportError:
-        # Fallback: create a simple ExceptionGroup-like class
-        class ExceptionGroup(Exception):  # type: ignore[no-redef]
-            def __init__(self, message: str, exceptions: list[Exception]):
-                super().__init__(message)
-                self.exceptions = exceptions
-
-    # Provide a BaseExceptionGroup-compatible name for older runtimes
-    BaseExceptionGroup = ExceptionGroup
-else:
-    from builtins import BaseExceptionGroup
-
-    ExceptionGroup = BaseExceptionGroup  # type: ignore[no-redef,misc]
 
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -37,6 +18,9 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
+
+from .compat import BaseExceptionGroup, ExceptionGroup
 
 # Load environment variables
 project_root = os.path.dirname(os.path.dirname(__file__))
@@ -130,11 +114,11 @@ class AsyncDatabasePool:
         sqlite_path = os.path.join(project_root, "tag_scraper_local.db")
         dsn = f"sqlite+aiosqlite:///{sqlite_path}"
 
+        # aiosqlite does not support concurrent writers; use NullPool to avoid
+        # misleading pool_size/max_overflow parameters that have no effect.
         self.engine = create_async_engine(
             dsn,
-            pool_size=self.pool_size,
-            max_overflow=self.max_overflow,
-            pool_timeout=self.pool_timeout,
+            poolclass=NullPool,
             echo=False,
             future=True,
         )
@@ -422,14 +406,24 @@ class AsyncBulkOperations:
 
 # Global database pool instance
 _db_pool: AsyncDatabasePool | None = None
+_db_pool_lock: asyncio.Lock | None = None
+
+
+def _get_pool_lock() -> asyncio.Lock:
+    """Get (or create) the pool initialization lock."""
+    global _db_pool_lock
+    if _db_pool_lock is None:
+        _db_pool_lock = asyncio.Lock()
+    return _db_pool_lock
 
 
 async def get_db_pool() -> AsyncDatabasePool:
-    """Get global database pool instance."""
+    """Get global database pool instance (safe for concurrent callers)."""
     global _db_pool
-    if _db_pool is None:
-        _db_pool = AsyncDatabasePool()
-        await _db_pool.initialize()
+    async with _get_pool_lock():
+        if _db_pool is None:
+            _db_pool = AsyncDatabasePool()
+            await _db_pool.initialize()
     return _db_pool
 
 
